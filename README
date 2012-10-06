@@ -1,0 +1,27 @@
+A set of scripts in PHP for managing NETDISKs on Linux computers. It 
+also provides a minimal use interface for uploading and downloading
+to the NETDISKs via the Internet.
+
+NDAS Hardware, such as the NETDISK by IOCELL Networks is used to connect
+block devices, to computers via the network.
+
+For more information about NDAS usage please visit us on the web:
+	
+	http://www.iocellnetworks.com
+	email: support@iocellnetworks.com
+
+For NDAS hardware manufacturing licenses or designs, please contact:
+	
+	sales@iocellnetworks.com
+
+The files in this repository only pertain to Linux systems because
+of the way the scripts gather information about the drives. 
+
+2012-10-04 History: 
+NDAS was created by Ximeta as a proprietary connection system for
+Network Direct Attached Storage devices. IOCELL Networks took ownership of
+all patents and technology rights to NDAS in 2011. From 2012 the connection
+packages are being open sourced. These scripts were originally created
+for use on small routers including cgi-bin access. We are going to
+implement the same functions all in PHP. 
+

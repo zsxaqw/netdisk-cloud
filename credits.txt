@@ -1,0 +1,8 @@
+cloud.header.left.forever.png
+	Original image downloaded 2012-09-23 from
+	http://commons.wikimedia.org/wiki/File:Pano_Clouds.jpg
+	GNU Free Documentation License, Version 1.2
+	
+javascript timer
+	Code found 2012-09-29
+	http://stackoverflow.com/questions/6893130/how-to-set-one-minute-counter-in-javascript

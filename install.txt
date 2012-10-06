@@ -1,0 +1,33 @@
+files and ffolder links are available on the network. 
+So, use the users encrypted password as a salt to access all their files.
+The salt will encode the url, so that in the user folders it will not be 
+able to guess the url very easily.
+How to:
+	User uploads file. 
+	Destination path is salted by encrpyted password. and saved in the file table.
+		user : ehcrpyted path
+	
+
+Sample visudo entries from a Debian based system where the webserver runs as www-data:
+
+User_Alias NDASADMIN=www-data
+Cmnd_Alias NDAS=/usr/sbin/ndasadmin,/bin/mount,/bin/umount,/bin/chown
+
+NDASADMIN ALL=(ALL:ALL) NOPASSWD: NDAS
+
+You could add other users to the alias, also by commas and they would also have permission for the tools used in the NDAS commands.
+The NDASADMIN line allows anyone in the group to run those programs without asking for a password. 
+There are bound to be security risks in this so it is for installer to decide to allow or not. 
+
+
+Creating Users
+Adduser 
+	write name, encrypted password, access to netdisk.users
+	add user folder to private and subfolders
+	su -c "mkdir private/name/audio/ private/name/documents/ private/name/images/ private/name/video/" www-data 
+		name
+			documents
+			images
+			video
+			audio
+	
