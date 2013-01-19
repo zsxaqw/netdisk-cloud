@@ -1,4 +1,21 @@
 <?php
+include('./config.php');
+
+/* This error logger only records action and operations in this program.
+ * The log file can be set in the config.php. 
+ */
+function ndasErrorLogger($level,$message){
+	
+	global $LOG_LEVEL;
+	global $LOG_FILE;
+	if ($level <= $LOG_LEVEL){
+		$message_type = 3; 
+		$error_log = $LOG_FILE;
+		$message = date('Y-m-d H:i:s') . $message . "\n"; 
+		error_log($message, $message_type, $error_log);
+	}
+}
+
 
 /* These functions allow the admin to perform tasks on the NetDISKs.
  * Some are used by the users too, in order to know if the drives are 
@@ -111,10 +128,9 @@ function ndasGetRegisteredNameFromDevice($func_device) {
 
 	/* this returns the name of the NDAS device name as set by the user when
 	 * they registered it with the ID and Key. */
+	global $LOG_LEVEL;
 	$output = Array();
 	$return_var = null;
-	$message_type = 3; 
-	$error_log = "./netdisk.error.log";
 
 	/* split the device name. */
 	$explodedName = explode("-",$func_device);
@@ -127,14 +143,25 @@ function ndasGetRegisteredNameFromDevice($func_device) {
 	$command = "grep ". $explodedName[1] ."  /proc/ndas/devs | awk '{print $1}' 2>&1";
 	exec($command, $output, $return_var);
 	if ($return_var > 0) {
-		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|ndasGetRegisteredNameFromDevice|Failed. Retvar $return_var\n";
-		error_log($message, $message_type, $error_log);
-		return "Error: $return_var";
+		$message = "|netdisk.functions.php|ndasGetRegisteredNameFromDevice|Failed. exec error# $return_var";
+		if ($LOG_LEVEL > 0){
+			ndasErrorLogger(1,$message);
+		}
+		$return_var = "Error: $return_var";
 	} else {
-		return $output[0];
-	}				
+		$return_var = $output[0];
+		$message = "|netdisk.functions.php|ndasGetRegisteredNameFromDevice|Success. Retvar $return_var";
+		if ($LOG_LEVEL > 0){
+			ndasErrorLogger(3,$message);
+		}
+	}
+	
+	
+	return $return_var;
+				
 }
 //echo ndasGetRegisteredNameFromDevice('/dev/ndas-44700486-0p1');
+
 
 /* Try to get the Registered Device name from the slot */
 function ndasGetRegisteredNameFromSlot($func_slot) {
@@ -143,8 +170,6 @@ function ndasGetRegisteredNameFromSlot($func_slot) {
 	 * registered it with the ID and Key. */
 	$output = Array();
 	$return_var = null;
-	$message_type = 3; 
-	$error_log = "./netdisk.error.log";
 	$slotArray = Array();
 	$command = "cat /proc/ndas/devs | awk '{print $1\" \"$7\" \"$8}' 2>&1";
 	exec($command, $output, $return_var);
@@ -156,8 +181,12 @@ function ndasGetRegisteredNameFromSlot($func_slot) {
 		unset($tmpArray);
 	}
 	
-	$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|getNdasRegisteredNameFromSlot|.\n";
-	//error_log($message, $message_type, $error_log);
+	global $LOG_LEVEL;
+	if ($LOG_LEVEL > 0){
+		$message = "|netdisk.functions.php|getNdasRegisteredNameFromSlot|";
+		ndasErrorLogger(3,$message);
+	}
+
 	return $slotArray[$func_slot];
 					
 }
@@ -170,9 +199,8 @@ function ndasGetDeviceNameFromSlot($func_slot) {
 	 * /dev or other identity parts on the fly. */
 	$output = Array();
 	$return = null;
-	$message_type = 3; 
-	$error_log = "./netdisk.error.log";
-
+	global $LOG_LEVEL;
+	
 	$block_file = "/proc/ndas/slots/$func_slot/devname";
 	if ( is_file($block_file) && $handle = fopen($block_file, "r") ) {
 		$line = exec("cat $block_file");
@@ -185,8 +213,10 @@ function ndasGetDeviceNameFromSlot($func_slot) {
 		return $blockdev;
 		
 	} else {
-		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|getNdasDeviceNameFromSlot|$block_file does not exist.\n";
-		error_log($message, $message_type, $error_log);
+		$message = "|netdisk.functions.php|getNdasDeviceNameFromSlot|$block_file does not exist.";
+		if ($LOG_LEVEL > 0){
+			ndasErrorLogger(1,$message);
+		}
 		return "GetDevnameError: 1";
 	}				
 }
@@ -209,16 +239,17 @@ function ndasIsDeviceEnabledRwOrRo($device) {
 	
 	$output = Array();
 	$return = null;
-	$message_type = 3; 
-	$error_log = "./netdisk.error.log";
 	$retval = '';
-		
+	global $LOG_LEVEL;
+			
 	/* determine if the device exists. */
 	$command = "ls /dev/$device  2>&1";
 	exec($command,$output,$return);
 	if ($return > 0) {
-		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|$device does not exist.\n";
-		error_log($message, $message_type, $error_log);
+		if ($LOG_LEVEL >= 2){
+			$message = "|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|$device does not exist.";
+			ndasErrorLogger(2,$message);
+		}
 		return "Error: 2";
 	} 
 	
@@ -226,19 +257,23 @@ function ndasIsDeviceEnabledRwOrRo($device) {
 	exec($command,$output,$return);
 	if ($return > 0) {
 		if ($return == 19){
-			$message = date('Y-m-d H:i:s') .
+			if ($LOG_LEVEL > 0){
+				$message = date('Y-m-d H:i:s') .
 				"|netdisk.functions.php|isNdasBlockDeviceWritable|ntfs-3g.probe|return: " . 
-				$return."|user has no permission for this tool\n";
-			error_log($message, $message_type, $error_log);
+				$return."|user has no permission for this tool.";
+				ndasErrorLogger(1,$message);
+			}
 			return "Error 19: $return";
 		}
 		/* Assuming RW, unless changed by scanning the output messages. */
 		$retval = 'RW';
 		foreach ($output as $v ){
-			$message = date('Y-m-d H:i:s') .
+			if ($LOG_LEVEL >= 3){
+				$message = date('Y-m-d H:i:s') .
 				"|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: " . 
-				$return."|$v\n";
-			error_log($message, $message_type, $error_log);
+				$return."|$v";
+				ndasErrorLogger(3,$message);
+			}
 			if(strpos($v,'Read-only file system')){
 				$retval = 'RO';			
 			} 
@@ -278,16 +313,16 @@ function ndasIsBlockDeviceWritable($device){
 	include('./config.php'); /* needs web root folder for mkdir */
 	$output = Array();
 	$return = null;
-	$message_type = 3; 
-	$error_log = "./netdisk.error.log";
 	$retval = '';
 		
 	/* ) determine if a partition exists. devname-#p# typically */
 	$command = "ls $device | grep p  2>&1";
 	exec($command,$output,$return);
 	if ($return > 0) {
-		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|ls|No partitions on $device\n";
-		error_log($message, $message_type, $error_log);
+		if ($LOG_LEVEL >= 2){
+			$message = "|netdisk.functions.php|isNdasBlockDeviceWritable|ls|No partitions on $device";
+			ndasErrorLogger(2,$message);
+		}
 		return "Error: 2";
 	} 
 	
@@ -301,8 +336,10 @@ function ndasIsBlockDeviceWritable($device){
 	$command = 'sudo /sbin/blkid -s TYPE -o value '.$partitionToTest.'  2>&1';
 	exec($command,$output,$return);
 	if ($return > 0) {
-		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|blkid|$v\n";
-		error_log($message, $message_type, $error_log);
+		if ($LOG_LEVEL >= 2){
+			$message = "|netdisk.functions.php|isNdasBlockDeviceWritable|blkid|$v";
+			ndasErrorLogger(2,$message);
+		}
 		return "Error: 3";
 	} 
 	
@@ -319,19 +356,21 @@ function ndasIsBlockDeviceWritable($device){
 		
 		if ($return > 0) {
 			if ($return == 19){
-				$message = date('Y-m-d H:i:s') .
-					"|netdisk.functions.php|isNdasBlockDeviceWritable|ntfs-3g.probe|return: " . 
-					$return."|user has no permission for this tool\n";
-				error_log($message, $message_type, $error_log);
+				if ($LOG_LEVEL > 0){
+					$message = "|netdisk.functions.php|isNdasBlockDeviceWritable|ntfs-3g.probe|return: " . 
+					$return."|user has no permission for this tool.";
+					ndasErrorLogger(1,$message);
+				}
 				return "3gProbeErr: $return";
 			}
 
 			/* Print any messages just in case admin wants to check later */
 			foreach ($output as $v ){
-				$message = date('Y-m-d H:i:s') .
-					"|netdisk.functions.php|isNdasBlockDeviceWritable|ntfs-3g.probe|return: " . 
-					$return."|$v\n";
-				error_log($message, $message_type, $error_log);
+				if ($LOG_LEVEL > 0){
+					$message = "|netdisk.functions.php|isNdasBlockDeviceWritable|ntfs-3g.probe|return: " . 
+					$return."|$v";
+					ndasErrorLogger(2,$message);
+				}
 			}
 			unset($output);
 			
@@ -352,19 +391,21 @@ function ndasIsBlockDeviceWritable($device){
 			str_replace('/dev', '', $device); 
 		if (!is_dir($tempMountingDirectory) ) {
 			if (!mkdir($tempMountingDirectory,0777)){
-				$message = date('Y-m-d H:i:s') . 
-					"|netdisk.functions.php|isNdasBlockDeviceWritable|mkdir|web user could " .
-					"not mkdir($tempMountingDirectory).\n";
-				error_log($message, $message_type, $error_log);
+				if ($LOG_LEVEL > 0){
+					$message = "|netdisk.functions.php|isNdasBlockDeviceWritable|mkdir|web user could " .
+					"not mkdir($tempMountingDirectory).";
+					ndasErrorLogger(1,$message);
+				}
 				return "Error 4"; 
 			}
 		}	
 		/* what if it was there and is not empty? There is a risk of losing data. */
 		if (count(glob("$tempMountingDirectory/*")) !== 0) {
-			$message = date('Y-m-d H:i:s') . 
-				"|netdisk.functions.php|isNdasBlockDeviceWritable|mkdir|attempted to mount " .
-				"ndas device to non-empty directory.\n";
-			error_log($message, $message_type, $error_log);
+			if ($LOG_LEVEL > 0){
+				$message = "|netdisk.functions.php|isNdasBlockDeviceWritable|mkdir|attempted to mount " .
+				"ndas device to non-empty directory.";
+				ndasErrorLogger(1,$message);
+			}
 			return "Error: 5"; 	
 		}
 		
@@ -374,11 +415,16 @@ function ndasIsBlockDeviceWritable($device){
 		$command = "sudo /bin/mount -nw -t $partitionFileSystemType $partitionToTest $tempMountingDirectory 2>&1";
 		exec($command,$output,$return);
 		if ($return > 0) {
-			$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|$command\n";
-			error_log($message, $message_type, $error_log);
+			if ($LOG_LEVEL > 0){
+				$message = "|netdisk.functions.php|isNdasBlockDeviceWritable|$command|failed.";
+				ndasErrorLogger(2,$message);
+			}
+
 			foreach ($output as $v) { 
-				$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|mount|$v\n";
-				error_log($message, $message_type, $error_log);
+				if ($LOG_LEVEL >= 3){
+					$message = "|netdisk.functions.php|isNdasBlockDeviceWritable|mount|$v.";
+					ndasErrorLogger(3,$message);
+				}
 				if (strpos($v,'write-protected') > 0 ) {
 					$retval .= "RO ";
 	 			} else if (strpos($v,'permission') > 0 ) {
@@ -395,8 +441,10 @@ function ndasIsBlockDeviceWritable($device){
 			exec($command,$output,$return);
 			if ($return > 0) {
 				foreach ($output as $v) { 
-					$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|umount|$v\n";
-					error_log($message, $message_type, $error_log);
+					if ($LOG_LEVEL >= 3){
+						$message = "|netdisk.functions.php|isNdasBlockDeviceWritable|umount|$v.";
+						ndasErrorLogger(3,$message);
+					}
 				}
 				$retval .= "Error: 8 ";
 			}
@@ -409,15 +457,17 @@ function ndasIsBlockDeviceWritable($device){
 		if (is_dir($tempMountingDirectory) ) {
 			/* what if it is not empty? There is a risk of losing data. */
 			if (count(glob("$tempMountingDirectory/*")) !== 0) {
-				$message = date('Y-m-d H:i:s') . 
-					"|netdisk.functions.php|isNdasBlockDeviceWritable|rmdir|temp dir is not empty.\n";
-				error_log($message, $message_type, $error_log);
+				if ($LOG_LEVEL >= 2){
+					$message = "|netdisk.functions.php|isNdasBlockDeviceWritable|rmdir|temp dir is not empty.";
+					ndasErrorLogger(2,$message);
+				}
 				$retval .= "Error: 9 "; 	
 			} else if (!rmdir($tempMountingDirectory)){
-				$message = date('Y-m-d H:i:s') . 
-					"|netdisk.functions.php|isNdasBlockDeviceWritable|rmdir|web user could " .
-					"not remove temp directory with php mkdir.\n";
-				error_log($message, $message_type, $error_log);
+				if ($LOG_LEVEL > 0){
+					$message = "|netdisk.functions.php|isNdasBlockDeviceWritable|rmdir|web user could " .
+					"not remove temp directory with php rmdir.";
+					ndasErrorLogger(2,$message);
+				}
 				$retval .= "Error 10 "; 
 			}
 		}	
