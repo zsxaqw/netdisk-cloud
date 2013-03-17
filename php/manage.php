@@ -3,7 +3,7 @@ include('auth.php');
 include('netdisk.functions.php');
 include('is_admin.php');
 
-$page_title = "NETDISK CLOUD DISK PARTITION MANAGEMENT";
+$PAGE_TITLE = "NETDISK CLOUD DISK PARTITION MANAGEMENT";
 include("header.php");
 
 $slot=isset($_GET['slot'])? $_GET['slot'] : null;
@@ -16,11 +16,11 @@ if (empty($slot))
 <script language='javascript'>
 	function ndasUnmountVol()
 	{
-		window.open('/cgi-bin/unmount.cgi','_unmountndas','width=300,height=300');
+		window.open('unmount.php','_unmountndas','width=300,height=300');
 	}
 	function ndasMountVol()
 	{
-		window.open('/cgi-bin/mount.cgi','_mountndas','width=300,height=300');
+		window.open('mount.php','_mountndas','width=300,height=300');
 	}
 </script>
 <h2>Mount and Unmount the file systems.</h2>
@@ -71,7 +71,7 @@ for($i=0;$i<count($mount_path);$i++)
 <? if ( $path == "") { 
 exec("find ".$TOP_MOUNTABLE_DIRECTORY."/ -maxdepth 3 -type d -empty", $empty_pdirs);
 ?>
-<form style='display:inline' action='/cgi-bin/mount.cgi' method='get'
+<form style='display:inline' action='mount.php' method='get'
 		target='_mountndas' onSubmit='javascript:ndasMountVol()'>
 <td><select name="mount_path">
 <?php
@@ -92,7 +92,7 @@ $showdir=base64_encode($path);
 ?>
 <td><a href="file.php?path=<?=$showdir?>"><?=$local_path?></a></td>
 <td>
-<form style='display:inline' action='/cgi-bin/unmount.cgi' method='get'
+<form style='display:inline' action='unmount.php' method='get'
 		target='_unmountndas' onSubmit='javascript:ndasUnmountVol()'>
 <input name="umount_slot" value="<?=$slot?>" type="hidden">
 <input name="umount_devi" value="<?=$d?>" type="hidden">
@@ -110,6 +110,6 @@ $showdir=base64_encode($path);
 Please note that you can not add/delete/modify or format the partitions from this interface.<br>
 To change the disk structure, access the NDAS device from the computers as the adminstrative user.<br>
 <br>
-<a href="logout.php">Logout</a> 
-</body>
-</html>
+<?php
+include ('footer.php');
+?>

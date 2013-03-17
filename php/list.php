@@ -2,7 +2,7 @@
 include('auth.php');
 include('netdisk.functions.php');
 
-$page_title = "NETDISK CLOUD ADMIN";
+$PAGE_TITLE = "NETDISK CLOUD ADMIN";
 include('header.php');
 
 $admin = false;
@@ -34,8 +34,7 @@ if($_SESSION['USERGROUP'] == 'admin') {
 		window.open('/cgi-bin/disable.cgi','_disndas','width=300,height=300');
 	}
 	</script>";
-	echo "<table width=100%>";
-	echo "<tr><td align=left>";
+	echo '<div id="server-info">';
 	echo "<h2>NETDISK Cloud Server Info</h2>";
 
 	$lanhostname=exec("hostname -f");
@@ -59,9 +58,9 @@ if($_SESSION['USERGROUP'] == 'admin') {
 	else
 		echo "Unable to determine.";
 
-	echo "<br>SESSION: ". session_id();
-	echo "</td></tr>
-	<tr><td>";
+	echo '<br>SESSION: '. session_id();
+	echo '</div>
+	<div id="ndas-device-info">';
 	echo "<h2>Registered NDAS Devices</h2>
 	<table border=1>";
 	if ( !is_file('/proc/ndas/devs') ) {
@@ -190,8 +189,8 @@ if($_SESSION['USERGROUP'] == 'admin') {
 ?>
 	</table>
 
-	</td></tr>
-	<tr><td>
+	</div>
+	<div id="ndas-registration">
 	<h2>Register a new NDAS device</h2>
 	<table><tr><td colspan="3">Browse for a registration file and read it in.</td></tr>
 	<tr><td><input type="file" id="files" name="file" ></td>
@@ -300,8 +299,9 @@ function readBlob(opt_startByte, opt_stopByte) {
     }
   }, false);
 </script>
-	</td></tr>
-	<tr><td>
+	</div>
+	
+	<div id="mounted-info"> 
 	<h2>Mounted directories</h2>
 	<table border=1>
 	<tr><th>Block Device</th><th>Mount Path</th><th>Connection</th></tr>
@@ -311,18 +311,18 @@ function readBlob(opt_startByte, opt_stopByte) {
 		    if ( strpos($line, "/dev/nd") === false ) continue;
 		    $tok = strtok($line, " \t\n");
 		    echo "<tr><td>".$tok."</td>";
-		    $enabledmode = ndasIsBlockDeviceWritable($tok);
 		    $tok = strtok(" \t\n");
 		    echo "<td>";
 			 $needle = $TOP_MOUNTABLE_DIRECTORY."/";
 		    echo "<a href=\"file.php?path=".base64_encode($tok)."\">".str_replace($needle,'',$tok)."</a>";
+		    $enabledmode = ndasIsMountedVolumeWritable($tok);
 		    echo "</td><td>$enabledmode</td></tr>";
 		  }
 		  echo "</td>\n";
 		  fclose($handle);
 	echo "</table>
-	</td></tr>
-	</table>
+	
+	</div>
 	<br>
 	<a href=admin.php>Admin</a>";
 }
@@ -347,10 +347,6 @@ else
 		  echo "</td>\n";
 	echo "</table>";
 }
+
+include('footer.php');
 ?>
-<br>
-<a href="logout.php">Logout</a>
-<hr>
-<img src="http://ndas4linux.iocellnetworks.com/trac/files/ndas.for.linux.tux.100px.h.png">
-</body>
-</html>

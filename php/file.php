@@ -21,7 +21,7 @@ if ( $dir == "." ){
 
 $visible_directory=str_replace($TOP_MOUNTABLE_DIRECTORY,'',$dir);
 
-$page_title = "Index of $visible_directory";
+$PAGE_TITLE = "Index of $visible_directory";
 
 include_once("header.php");
 ?>

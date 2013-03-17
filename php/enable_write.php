@@ -12,7 +12,7 @@ include('netdisk.functions.php');
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
-	<link rel="stylesheet" href="../css/styles.css" type="text/css" />
+   <link rel="stylesheet" href="../skins/default/styles.css" type="text/css" />
 	<title>Enable NDAS RW</title>
 </head>
 <?php
@@ -36,14 +36,16 @@ if ($slot){
 	/* request rw access or attempt to enable */
 	if ( $requestrw === "y" ) {
 		$command = "sudo /usr/sbin/ndasadmin request -s $slot 2>&1";
+		$message = date('Y-m-d H:i:s'). "|enable_write.php|requestrw|attempt|$command.\n";
+		ndasPhpLogger(5,$message);
 		exec($command,$results,$return);
 		if ($return > 0) {
 			$message = date('Y-m-d H:i:s'). "|enable_write.php|requestrw|failed|$command.\n";
-			error_log($message, $message_type, $error_log);
+			ndasPhpLogger(1,$message);
 			foreach ($results as $v ){
 				/* log any errors returned by the system */
 				$message = date('Y-m-d H:i:s'). "|enable_write.php|requestrw|failed|output|$v.\n";
-				error_log($message, $message_type, $error_log);
+				ndasPhpLogger(1,$message);
 				echo "An error occurred with the write permission request. 
 						There may be more information in the server log. ";				 
 			}

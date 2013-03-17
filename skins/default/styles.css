@@ -1,25 +1,12 @@
-#footer{
-	margin:10px;
-	}
 #headerTopDiv{
-	background-image:url('http://www.iocellnetworks.com/power/cloud/images/cloud.header.left.forever.png');
-	height:140px
-}
+	background-image:url('./cloud.header.left.forever.png');
+	height:140px;
+	margin:0;
+	}
 #main-div {
-	margin: 10px;
+	margin: 0 0 0 10px;
 	}
-#netdisk-slot-details{
-	font-family: "Courier New", Courier, monospace; 
-	font-size: 10pt; 
-	border-collapse: collapse;	
-	width: 350px;
-	white-space: nowrap;
-	td th {
-		border: 1px solid gray;
-		}
-	}
-#netdisk-slot-details .th .td  {
-	border: 1px solid gray;
+#footer {
 	}
 .css_browse_button {
 	font-family:'trebuchet,arial,sans';
@@ -28,6 +15,14 @@
 	border:1px solid;
 	height:14px;
 	} 
+.footer-info {
+	display: inline-block;
+	margin-right: 20px;
+	vertical-align: top;
+	}
+.footer-info a:visited {
+	color: black;
+	}
 a, a:active {
 	text-decoration: none; 
 	color: blue;
@@ -41,7 +36,8 @@ a:hover, a:focus {
 body {
 	background-color: #F5F5F5;
 	margin:0;
-	padding: 0;
+	font-size:14px;
+	font-family:Arial, Helvetica, sans-serif;
 	}
 div.list { 
 	background-color: white; 
@@ -57,6 +53,9 @@ div.foot {
 form { 
 	margin-bottom:0; 
 	}  
+html {
+    overflow-y: scroll;
+	}
 h2 {
 	padding:15px 0 0 0;
 	margin: 0 0 12px 0;
@@ -68,6 +67,14 @@ input.btn {
 	color: #3f3f3f; 
 	border:1px solid;
 	background: #efffff
+	}
+input.btn:hover{  
+	font-family:'trebuchet ms',helvetica,sans-serif;
+	font-size:10;
+	font-weight:bold;
+	color: #3f3f3f; 
+	border:1px solid;
+	background: #DDCEFF;
 	}
 input.ndasid, input.ndasname, input.ndasregfile {
 	border: 1px solid rgb(112, 112, 112); 

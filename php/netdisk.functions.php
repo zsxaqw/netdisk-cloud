@@ -3,8 +3,82 @@
 /* These functions allow the admin to perform tasks on the NetDISKs.
  * Some are used by the users too, in order to know if the drives are 
  * writeable for instance. Next line will act on an ajax request. 
- * post vars should be ndasfunction=ndasFunctionName & var(s) */
+ * post vars should be ndasfunction=ndasFunctionName & var(s) 
+ * 
+ * ndasSetBlockDeviceScheduler 
+ * ndasShowDiskInformation
+ * ndasGetRegisteredNameFromDevice
+ * ndasGetRegisteredNameFromSlot
+ * ndasGetDeviceNameFromSlot
+ * ndasIsDeviceEnabledRwOrRo
+ * ndasIsBlockDeviceWritable          String RO, RW or Error #
+ * ndasIsMountedVolumeWritable        String RO, RW or Error
+ * 
+ *
+ */
 $ndasAjaxRequest = isset($_POST['ndasAjaxFunction']) ? $_POST['ndasAjaxFunction'] : null;
+
+
+/* Change the kernel queue scheduler on the disk for performance evaluations */
+function ndasSetBlockDeviceScheduler($scheduler,$device){
+
+	include("./config.php");
+	
+	$new_scheduler = isset($scheduler)? $scheduler : "trustmessiahjesus" ;
+	$block_dev_name = isset($device)? $device : "Need scheduler file location.";
+	$filename = "/sys/block/$block_dev_name/queue/scheduler";
+	
+	
+	/* let us double check that the scheduler type exists on this device. */
+	if (!is_file($filename)) {
+		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|ndasSetBlockDeviceScheduler|Failed. $block_dev_name \n";
+		ndasPhpLogger(2,$message);
+		return "Block device name error: $filename";
+	} 
+	$curr_scheduler = file_get_contents($filename);
+	if (!strpos($curr_scheduler, $new_scheduler)) {
+		return "Invalid scheduler: $new_scheduler";
+	}		
+	
+	/* try to set the new scheduler */
+	$output = Array();
+	$return = null;
+	$message_type = 3; 
+	$error_log = "./netdisk.error.log";
+	$err_message = "There may be more information in the local log file.";
+	
+	$command = "sudo ".$WEB_ROOT . $INSTALL_DIR. "/php/setscheduler $new_scheduler $filename";
+	exec($command,$results,$return);
+	if($return !== 0) {
+		$message = date('Y-m-d H:i:s'). "|setscheduler.php|set|failed|$command.\n";
+		ndasPhpLogger(2,$message);
+		$message = date('Y-m-d H:i:s'). "|setscheduler.php|set|failed|returned: $return.\n";
+		ndasPhpLogger(2,$message);
+		
+		foreach ($results as $v ){
+			/* log any errors returned by the system */
+			$message = date('Y-m-d H:i:s'). "|setscheduler.php|set|failed|output|$v.\n";
+			ndasPhpLogger(2,$message);
+			if (strpos($v, 'Permission denied')) $err_message = "Permission denied.";
+		}
+	
+		$message = "Could not set scheduler. $err_message" ;
+	
+	} else {
+		
+		$message = "Success! ";
+		
+	}
+	return $message;
+}
+//echo ndasSetBlockDeviceScheduler('/dev/ndas-12345678-0','noop')
+if ($ndasAjaxRequest == 'ndasSetBlockDeviceScheduler'){
+	$new_scheduler = isset($_REQUEST['sch'])? $_REQUEST['sch'] : "trustmessiahjesus" ;
+	$block_dev_name = isset($_REQUEST['dev'])? $_REQUEST['dev'] : die("Need scheduler file location.");
+	if ( !$block_dev_name || !$new_scheduler ) die("No Input");
+	die( ndasSetBlockDeviceScheduler($new_scheduler,$block_dev_name) );	
+}
+
 
 /* Show all the disk information */
 function ndasShowDiskInformation($func_slot){
@@ -13,8 +87,7 @@ function ndasShowDiskInformation($func_slot){
 	 * information about the disk availble in /proc/ndas/slots/SLOT#/
 	 */
 	$output = Array();
-	$message_type = 3; 
-	$error_log = "./netdisk.error.log";
+	include('./config.php'); /* needs web root folder for mkdir */
 	
 	$return_table = '<table class="netdisk-slot-details">';
 	
@@ -100,9 +173,8 @@ function ndasShowDiskInformation($func_slot){
 //echo "Slot 1<br>". ndasShowDiskInformation(1);
 if ($ndasAjaxRequest == 'ndasShowDiskInformation'){
 	$post_slot = isset( $_POST['slot'] ) ? $_POST['slot'] : null;
-	if (!$post_slot) return "No Input";
+	if (!$post_slot) die("No Input");
 	die( ndasShowDiskInformation($post_slot) );	
-		
 }
 
 
@@ -111,10 +183,9 @@ function ndasGetRegisteredNameFromDevice($func_device) {
 
 	/* this returns the name of the NDAS device name as set by the user when
 	 * they registered it with the ID and Key. */
+	include('./config.php'); /* needs web root folder for mkdir */
 	$output = Array();
 	$return_var = null;
-	$message_type = 3; 
-	$error_log = "./netdisk.error.log";
 
 	/* split the device name. */
 	$explodedName = explode("-",$func_device);
@@ -128,50 +199,64 @@ function ndasGetRegisteredNameFromDevice($func_device) {
 	exec($command, $output, $return_var);
 	if ($return_var > 0) {
 		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|ndasGetRegisteredNameFromDevice|Failed. Retvar $return_var\n";
-		error_log($message, $message_type, $error_log);
+		ndasPhpLogger(4,$message);
 		return "Error: $return_var";
 	} else {
 		return $output[0];
 	}				
 }
 //echo ndasGetRegisteredNameFromDevice('/dev/ndas-44700486-0p1');
+if ($ndasAjaxRequest == 'ndasGetRegisteredNameFromDevice'){
+	$post_device = isset( $_POST['device'] ) ? $_POST['device'] : null;
+	if (!$post_device) die("No Input");
+	die( ndasGetRegisteredNameFromDevice($post_device) );	
+}
+
 
 /* Try to get the Registered Device name from the slot */
 function ndasGetRegisteredNameFromSlot($func_slot) {
 
 	/* this returns the name of the NDAS device as set by the user when they 
-	 * registered it with the ID and Key. */
+	 * registered it with the ID and Key. 
+	 */
+	include("./config.php");
 	$output = Array();
 	$return_var = null;
-	$message_type = 3; 
-	$error_log = "./netdisk.error.log";
 	$slotArray = Array();
 	$command = "cat /proc/ndas/devs | awk '{print $1\" \"$7\" \"$8}' 2>&1";
-	exec($command, $output, $return_var);
-	for($i=1;$i< count($output); $i++){
-		$tmpArray = explode(" ", $output[$i]);
-		for($j=1;$j < count($tmpArray); $j++){
-				$slotArray[ $tmpArray[$j] ] = $tmpArray[0];
+	if(is_file('/proc/ndas/devs')){
+		exec($command, $output, $return_var);
+		for($i=1;$i< count($output); $i++){
+			$tmpArray = explode(" ", $output[$i]);
+			for($j=1;$j < count($tmpArray); $j++){
+					$slotArray[ $tmpArray[$j] ] = $tmpArray[0];
+			}
+			unset($tmpArray);
 		}
-		unset($tmpArray);
-	}
-	
-	$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|getNdasRegisteredNameFromSlot|.\n";
-	//error_log($message, $message_type, $error_log);
-	return $slotArray[$func_slot];
-					
+		
+		return $slotArray[$func_slot];
+	} else {
+		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|getNdasRegisteredNameFromSlot|/ndas/devs does not exist..\n";
+		ndasPhpLogger(4,$message);
+		return "Error: /ndas/devs does not exist.";	
+	}				
 }
 //echo ndasGetRegisteredNameFromSlot(1)
+if ($ndasAjaxRequest == 'ndasGetRegisteredNameFromSlot'){
+	$post_slot = isset( $_POST['slot'] ) ? $_POST['slot'] : null;
+	if (!$post_slot) die("No Input");
+	die( ndasGetRegisteredNameFromSlot($post_slot) );	
+}
+
 	
 /* Try to get the /dev/ndas- name from the slot */
 function ndasGetDeviceNameFromSlot($func_slot) {
 
 	/* this only returns the ndas-serialnumber string. You may have to add 
 	 * /dev or other identity parts on the fly. */
+	include('./config.php'); /* needs web root folder for mkdir */
 	$output = Array();
 	$return = null;
-	$message_type = 3; 
-	$error_log = "./netdisk.error.log";
 
 	$block_file = "/proc/ndas/slots/$func_slot/devname";
 	if ( is_file($block_file) && $handle = fopen($block_file, "r") ) {
@@ -186,17 +271,23 @@ function ndasGetDeviceNameFromSlot($func_slot) {
 		
 	} else {
 		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|getNdasDeviceNameFromSlot|$block_file does not exist.\n";
-		error_log($message, $message_type, $error_log);
+		ndasPhpLogger(4,$message);
 		return "GetDevnameError: 1";
 	}				
 }
 //echo  ndasGetDeviceNameFromSlot(1) 
+if ($ndasAjaxRequest == 'ndasGetDeviceNameFromSlot'){
+	$post_slot = isset( $_POST['slot'] ) ? $_POST['slot'] : null;
+	if (!$post_slot) die("No Input");
+	die( ndasGetDeviceNameFromSlot($post_slot) );	
+}
+
 
 /* Use ntfs-3g.probe to determine if the ndas device is enabled ro or rw */
 function ndasIsDeviceEnabledRwOrRo($device) {
 
 	/* This might not be completely reliable. It sends a Read-only error, 
-	 * but after thatn Read Write is just assumed.
+	 * but after that Read Write is just assumed.
 	 *
 	 *	Note: It might fail when using a shared rw 
 	 *
@@ -207,19 +298,19 @@ function ndasIsDeviceEnabledRwOrRo($device) {
 	 *		2 - device does not exist 
 	 */
 	
+	include('./config.php'); 
 	$output = Array();
 	$return = null;
-	$message_type = 3; 
-	$error_log = "./netdisk.error.log";
 	$retval = '';
 		
 	/* determine if the device exists. */
-	$command = "ls /dev/$device  2>&1";
+	$command = "/bin/ls /dev/$device  2>&1";
 	exec($command,$output,$return);
 	if ($return > 0) {
-		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|$device does not exist.\n";
-		error_log($message, $message_type, $error_log);
-		return "Error: 2";
+		$message = date('Y-m-d H:i:s'). 
+		"|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|$device does not exist.\n";
+		ndasPhpLogger(1,$message);
+		return "Error: 2 $device" ;
 	} 
 	
 	$command = "sudo /bin/ntfs-3g.probe --readwrite /dev/$device 2>&1";
@@ -229,7 +320,7 @@ function ndasIsDeviceEnabledRwOrRo($device) {
 			$message = date('Y-m-d H:i:s') .
 				"|netdisk.functions.php|isNdasBlockDeviceWritable|ntfs-3g.probe|return: " . 
 				$return."|user has no permission for this tool\n";
-			error_log($message, $message_type, $error_log);
+			ndasPhpLogger(3,$message);
 			return "Error 19: $return";
 		}
 		/* Assuming RW, unless changed by scanning the output messages. */
@@ -238,8 +329,11 @@ function ndasIsDeviceEnabledRwOrRo($device) {
 			$message = date('Y-m-d H:i:s') .
 				"|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: " . 
 				$return."|$v\n";
-			error_log($message, $message_type, $error_log);
+			ndasPhpLogger(2,$message);
 			if(strpos($v,'Read-only file system')){
+				$retval = 'RO';			
+			} 
+			if(strpos($v,'as read-only')){
 				$retval = 'RO';			
 			} 
 		}
@@ -248,19 +342,18 @@ function ndasIsDeviceEnabledRwOrRo($device) {
 		return 'RW';	
 	}
 }
-/*
-echo "<br><br>DeviceEnabled:";
-echo "<br>&nbsp;&nbsp;&nbsp;ndas-44809965-1: ";
-echo ndasIsDeviceEnabledRwOrRo('ndas-44809965-1');
-echo "<br>&nbsp;&nbsp;&nbsp;ndas-44700486-0: ";
-echo ndasIsDeviceEnabledRwOrRo('ndas-44700486-0');
-*/
+//echo ndasIsDeviceEnabledRwOrRo('ndas-44809965-1');
+if ($ndasAjaxRequest == 'ndasIsDeviceEnabledRwOrRo'){
+	$post_device = isset( $_POST['device'] ) ? $_POST['device'] : null;
+	if (!$post_device) die("No Input");
+	die( ndasIsDeviceEnabledRwOrRo($post_device) );	
+}
 
 
-/* Find out if the partition on the ndas block device is writeable. */ 
+/* Check if a partition is writeable prior to mounting. */ 
 function ndasIsBlockDeviceWritable($device){
 	/* Notes: www-user needs mkdir and mount permission.
-	 *	 		 shared rw is still writeable so return 0.
+	 *	 		 Returns RO, RW or Error #
 	 *	Some possible errors: 
 	 *		2 - ndas device has no partitions 
 	 *		3 - partition type could not be determined
@@ -275,20 +368,19 @@ function ndasIsBlockDeviceWritable($device){
 	 *		 - Unknown error.
 	 */
 	
-	include('./config.php'); /* needs web root folder for mkdir */
+	include('./config.php'); 
 	$output = Array();
 	$return = null;
-	$message_type = 3; 
-	$error_log = "./netdisk.error.log";
 	$retval = '';
-		
+	$ONLYRO = false;
+	
 	/* ) determine if a partition exists. devname-#p# typically */
-	$command = "ls $device | grep p  2>&1";
+	$command = "/bin/ls $device | grep p  2>&1";
 	exec($command,$output,$return);
 	if ($return > 0) {
 		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|ls|No partitions on $device\n";
-		error_log($message, $message_type, $error_log);
-		return "Error: 2";
+		ndasPhpLogger(3,$message);
+		return "Error: 2 ";
 	} 
 	
 	/* if we got here, we have at least one partition on the device. */
@@ -302,50 +394,68 @@ function ndasIsBlockDeviceWritable($device){
 	exec($command,$output,$return);
 	if ($return > 0) {
 		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|blkid|$v\n";
-		error_log($message, $message_type, $error_log);
+		ndasPhpLogger(3,$message);
 		return "Error: 3";
 	} 
 	
-	/* if we got here, we have at least one partition on the device. */
+	/* We can test writeable or not with file system methods. */
 	$partitionFileSystemType = $output[0];
 	unset($output);
 	unset($return);
 	unset($v);
 
-	/* If it is ntfs, we can use ntfs-3g.probe to determine if it can be mounted rw */
+	/* If it is ntfs, we can use ntfs-3g.probe to determine if it can be 
+	 * mounted rw the ro option must be set if it cannot be mounted rw. 
+	 * With this tool, successful test returns 0 but that does not mean
+	 * the volume is RW. So we are doing several tests.
+	 */
 	if ($partitionFileSystemType == 'ntfs') {
 		$command = "sudo /bin/ntfs-3g.probe --readwrite $partitionToTest 2>&1";
 		exec($command,$output,$return);
 		
-		if ($return > 0) {
-			if ($return == 19){
-				$message = date('Y-m-d H:i:s') .
-					"|netdisk.functions.php|isNdasBlockDeviceWritable|ntfs-3g.probe|return: " . 
-					$return."|user has no permission for this tool\n";
-				error_log($message, $message_type, $error_log);
-				return "3gProbeErr: $return";
-			}
+		if ($return == 19){
+			$message = date('Y-m-d H:i:s') .
+				"|netdisk.functions.php|isNdasBlockDeviceWritable|ntfs-3g.probe|return: " . 
+				$return."|user has no permission for this tool\n";
+			ndasPhpLogger(3,$message);
+			return "3gProbeErr: $return";
+		}
+		if ($return > 0){
+			$message = date('Y-m-d H:i:s') .
+				"|netdisk.functions.php|isNdasBlockDeviceWritable|ntfs-3g.probe|return: " . 
+				$return;
+			ndasPhpLogger(3,$message);
+			return "3gProbeErr: $return";
+		}
 
-			/* Print any messages just in case admin wants to check later */
-			foreach ($output as $v ){
-				$message = date('Y-m-d H:i:s') .
-					"|netdisk.functions.php|isNdasBlockDeviceWritable|ntfs-3g.probe|return: " . 
-					$return."|$v\n";
-				error_log($message, $message_type, $error_log);
-			}
-			unset($output);
-			
-			/* test if device can be mounted RO. It is safe even if errors on RW. */
+		/* Look for read-only errors in the output and log any messages just in
+		 * case admin wants to check later. */
+		foreach ($output as $v ){
+			$message = date('Y-m-d H:i:s') .
+				"|netdisk.functions.php|isNdasBlockDeviceWritable|ntfs-3g.probe|return: " . 
+				$return."|$v\n";
+			ndasPhpLogger(3,$message);
+			if(strpos($v,'Read-only file system') || strpos($v,'as read-only')){
+				$ONLYRO = true;
+			} 
+		}
+		unset($output);
+
+		if ($ONLYRO === true ) {
+			/* there is some reason that this partition is RO. So test if device 
+			 * can be mounted RO. It is safe even if errors on RW. 
+			 */
 			$command = "sudo /bin/ntfs-3g.probe --readonly $partitionToTest 2>&1";
 			exec($command,$output,$return);
 			if ($return == 0) 
 				return 'RO';
 			else 
 				return '3gRoErr: '.$return;		
-
-		} else {
-			return 'RW';	
-		}
+		} 
+		
+		/* Since we could not prove it is RO, we assume RW on ntfs is ok. */
+		return "RW $partitionToTest";
+			
 	} else {
 		/* create a temp folder */  
 		$tempMountingDirectory = $WEB_ROOT . $INSTALL_DIR . 
@@ -355,7 +465,7 @@ function ndasIsBlockDeviceWritable($device){
 				$message = date('Y-m-d H:i:s') . 
 					"|netdisk.functions.php|isNdasBlockDeviceWritable|mkdir|web user could " .
 					"not mkdir($tempMountingDirectory).\n";
-				error_log($message, $message_type, $error_log);
+				ndasPhpLogger(3,$message);
 				return "Error 4"; 
 			}
 		}	
@@ -364,7 +474,7 @@ function ndasIsBlockDeviceWritable($device){
 			$message = date('Y-m-d H:i:s') . 
 				"|netdisk.functions.php|isNdasBlockDeviceWritable|mkdir|attempted to mount " .
 				"ndas device to non-empty directory.\n";
-			error_log($message, $message_type, $error_log);
+			ndasPhpLogger(3,$message);
 			return "Error: 5"; 	
 		}
 		
@@ -375,10 +485,10 @@ function ndasIsBlockDeviceWritable($device){
 		exec($command,$output,$return);
 		if ($return > 0) {
 			$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|$command\n";
-			error_log($message, $message_type, $error_log);
+			ndasPhpLogger(4,$message);
 			foreach ($output as $v) { 
 				$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|mount|$v\n";
-				error_log($message, $message_type, $error_log);
+				ndasPhpLogger(4,$message);
 				if (strpos($v,'write-protected') > 0 ) {
 					$retval .= "RO ";
 	 			} else if (strpos($v,'permission') > 0 ) {
@@ -389,14 +499,14 @@ function ndasIsBlockDeviceWritable($device){
 			}
 		} else {
 			$retval = "RW ";
-			/* If the file system mounted rw, we must unmuont. We did not write 
+			/* If the file system mounted rw, we must unmount. We did not write 
 			 * in the mtab entry before so it must dismount here with the directory. */
 			$command = "sudo /bin/umount -l $tempMountingDirectory 2>&1";
 			exec($command,$output,$return);
 			if ($return > 0) {
 				foreach ($output as $v) { 
 					$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|umount|$v\n";
-					error_log($message, $message_type, $error_log);
+					ndasPhpLogger(4,$message);
 				}
 				$retval .= "Error: 8 ";
 			}
@@ -411,25 +521,63 @@ function ndasIsBlockDeviceWritable($device){
 			if (count(glob("$tempMountingDirectory/*")) !== 0) {
 				$message = date('Y-m-d H:i:s') . 
 					"|netdisk.functions.php|isNdasBlockDeviceWritable|rmdir|temp dir is not empty.\n";
-				error_log($message, $message_type, $error_log);
+				ndasPhpLogger(4,$message);
 				$retval .= "Error: 9 "; 	
 			} else if (!rmdir($tempMountingDirectory)){
 				$message = date('Y-m-d H:i:s') . 
 					"|netdisk.functions.php|isNdasBlockDeviceWritable|rmdir|web user could " .
 					"not remove temp directory with php mkdir.\n";
-				error_log($message, $message_type, $error_log);
+				ndasPhpLogger(1,$message);
 				$retval .= "Error 10 "; 
 			}
 		}	
 		return $retval;
 	} 
 }
- 
-/*
-echo DeviceWritable:
-echo "<br>&nbsp;&nbsp;&nbsp;ndas-44700486-0: ";
-echo ndasIsDeviceWritable('ndas-44700486-0');
-echo "<br>&nbsp;&nbsp;&nbsp;ndas-44809965-1: ";
-echo ndasIsDeviceWritable('ndas-44809965-1');
-*/
+//echo ndasIsDeviceWritable('ndas-44700486-0');
+if ($ndasAjaxRequest == 'ndasIsBlockDeviceWritable'){
+	$post_device = isset( $_POST['device'] ) ? $_POST['device'] : null;
+	if (!$post_device) die("No Input");
+	die( ndasIsBlockDeviceWritable($post_device) );	
+} 
+
+
+/* Check if a mounted partition is writeable or not */
+function ndasIsMountedVolumeWritable($directory) {
+	
+	include('./config.php'); 
+
+	/* Just try touching a file.  */
+	$filename = "ndastestfile-".time().".txt";
+	$touchfile = $directory."/".$filename;
+	
+	/* using @ suppresses an error message report to the browser. */
+	if (@touch($touchfile)) {
+ 		/* Delete the file and report RW */
+		unlink($touchfile);
+		return "RW";
+	} else {
+		return "RO";	
+	}
+
+}
+//echo ndasIsMountedVolumeWritable(/dev/ndas-44700486-0p2);
+if ($ndasAjaxRequest == 'ndasIsMountedVolumeWritable'){
+	$post_device = isset( $_POST['device'] ) ? $_POST['device'] : null;
+	if (!$post_device) die("No Input");
+	die( ndasIsMountedVolumeWritable($post_device) );	
+
+}
+
+/* Log errors from the web user to a local file using php's error_log 
+function. It will only record the log message if the log_level according
+to the global settings. */
+function ndasPhpLogger($log_level,$log_message){
+	include('./config.php');
+	$message_type = $PHP_LOG_TYPE; 
+	$error_log = "./netdisk.php.error.log";
+	if( $log_level <= $ADMIN_LOG_LEVEL || $log_level <= $USER_LOG_LEVEL){
+		error_log($log_message, $message_type, $error_log);
+	}
+}
 ?>

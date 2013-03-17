@@ -8,7 +8,7 @@ $showslot = isset($_GET['slot'])? $_GET['slot'] : die("Invalid Slot");
 <head>
 	<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
 	<title>NDAS Drive Details</title>
-	<link rel="stylesheet" href="../css/styles.css" type="text/css" />
+   <link rel="stylesheet" href="../skins/default/styles.css" type="text/css" />
       
 </head>
 <body>

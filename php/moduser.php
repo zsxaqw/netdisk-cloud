@@ -13,18 +13,18 @@ if(!empty($moduserid))
 	$ufile = "netdisk.user";
 	if(!file_exists($ufile))
 	{
-		echo "<h3>user information file is not exist: ".$ufile."</h3>";
+		echo "<h3>ERROR: User information file does not exist: ".$ufile."</h3>";
 		exit;
 	}
 	$fp = fopen($ufile,"r+");
 	if(!$fp)
 	{
-		echo "<h3>Cannot open user information file: ".$ufile."</h3>";
+		echo "<h3>ERROR: Cannot open user information file: ".$ufile."</h3>";
 		exit;
 	}
 	if(!flock($fp, LOCK_EX))
 	{
-		echo "<h3>Other connection is using the user information file</h3>";
+		echo "<h3>ERROR: ".$ufile." is locked.</h3>";
 		exit;
 	}
 	$find = false;

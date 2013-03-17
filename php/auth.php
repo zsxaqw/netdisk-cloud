@@ -314,28 +314,40 @@ if ( $_SESSION['AUTH'] != "TRUE")
 	}
 	
     if( $_SESSION['AUTH'] != "TRUE")
-	{                                             
+	{     
 ?>                                                                              
-    <img src="http://ndas4linux.iocellnetworks.com/trac/files/ndas.for.linux.tux.100px.h.png">
-    <h3>NETDISK CLOUD</h3>
-    <form name="authLoginForm" action="<?php echo $pageURL; ?>" method="POST">                                  
-    <table>
-     <tr>
-        <td>User ID:</td><td><input type=text name=userid></td>
-     </tr>
-     <tr>
-        <td>Password:</td><td><input type=text name=password></td>                                
-     </tr>
-     </table>
-     <input type=submit value="Login">                                           
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+	<head>
+	      <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+	      <title><?php echo $PAGE_TITLE ?></title>
+	      <link rel="stylesheet" href="../skins/default/styles.css" type="text/css" />
+	      <link rel="stylesheet" href="../skins/default/main-nav.css" type="text/css" />
+	      
+	</head>
+	<body>
+	<div id="headerTopDiv" style="">&nbsp;</div>
+	<div id="main-nav">
+	<center>
+	<form name="authLoginForm" action="<?php echo $pageURL; ?>" method="POST">                                  
+	<h3>NETDISK CLOUD</h3>
+	<table>
+		<tr>
+			<td>User ID:</td><td><input type="text" name="userid"></td>
+		</tr>
+		<tr>
+			<td>Password:</td><td><input type="password" name="password"></td>                                
+		</tr>
+	</table>
+	<input type=submit value="Login">                                           
 <?php
 	if ( isset($_POST['path']) ) {
             echo "<input type=hidden name=path value=\"".$_POST['path']."\">";
 	}
 ?>
-    </form>                                                                         
-<?php                                                                           
-        exit;                                                                   
+    </form>
+    </center>                                                                         
+<?php 
+		exit;                                                                   
     }
 }                                                                               
 ?>        
