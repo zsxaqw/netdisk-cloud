@@ -51,14 +51,15 @@ if($_SESSION['USERGROUP'] == 'admin') {
 	else
 		echo "Unable to determine.";
 
-	$wanip=file_get_contents($WAN_IP_DETECTION_URL);
-	echo "<br>WAN IP: ";
-	if ( $wanip ) 
-		echo $wanip;
-	else
-		echo "Unable to determine.";
+	if(!empty($WAN_IP_DETECTION_URL)){
+		$wanip=file_get_contents($WAN_IP_DETECTION_URL);
+		echo "<br>WAN IP: ";
+		if ( $wanip ) 
+			echo $wanip;
+		else
+			echo "Unable to determine.";
+	}
 
-	echo '<br>SESSION: '. session_id();
 	echo '</div>
 	<div id="ndas-device-info">';
 	echo "<h2>Registered NDAS Devices</h2>

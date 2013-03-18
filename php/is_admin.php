@@ -11,4 +11,5 @@ if($sessionGroup != 'admin') {
 	echo "<br><a href=\"javascript:self.close()\">Close</a>";
 	exit;
 }
+
 ?>

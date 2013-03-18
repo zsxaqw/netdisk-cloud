@@ -14,6 +14,7 @@ return $url;
 }
 $pageURL=curPageURL();
 
+
 include('config.php');
 
 /* Test if the user is in the administrator group.
@@ -84,7 +85,6 @@ function getUserGroupFromDatabase($userId){
 }
 
 
-//
 function readDirFile()
 {
 	$conf = "netdisk.dir";
@@ -214,6 +214,7 @@ function getUserFromSavedSessionId(){
 	return $userIdFound;
 }
 
+
 /* Delete the saved session data based on the id and/or current session 
  * for the user. It happens on logout, when someone sends a fake a url or 
  * form data as a username or when folder access is requested but the session
@@ -276,7 +277,7 @@ function deleteSavedSessionId($uname){
 	}
 }
 
-//
+
 session_start(); 
 
 if (! isset($_SESSION['SHOW_HIDDEN'])){

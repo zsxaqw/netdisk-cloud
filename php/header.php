@@ -1,6 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-      <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
       <title><?php echo $PAGE_TITLE ?></title>
       <link rel="stylesheet" href="../skins/default/styles.css" type="text/css" />
       <link rel="stylesheet" href="../skins/default/main-nav.css" type="text/css" />
