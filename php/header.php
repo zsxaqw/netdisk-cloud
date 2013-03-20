@@ -16,21 +16,22 @@ if (userIsAdmin()){
 <div id="headerTopDiv" style="">&nbsp;</div>
 <div id="main-nav">
 	<ul id="nav">
-		<li><a href="list.php">Home</a></li>
-		<li>My Account</li>
 		<li><a href="logout.php">Logout</a></li>
 <?php
 if (userIsAdmin())	{
 ?>
-		<li><a href="user_manage.php">Users</a>
-			<ul>
-			<li>List of Users</li>
-			</ul>
-		</li>
+		<li><a href="user_manage.php">Accounts</a></li>
 		<li><a href="folder_manage.php">Folders</a></li>
+		<li><a href="logviewer.php">Logs</a></li>
+		<li><a href="configuration.php">Configuration</a></li>
+<?php
+} else {
+?>
+   <li><a href="user_manage.php">Account</a></li>
 <?php
 }
 ?>
+		<li><a href="list.php">Home</a></li>
 	</ul>
 </div>
 
