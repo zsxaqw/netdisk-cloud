@@ -83,4 +83,6 @@ else
 		echo "<p>Folder '".$ndirpath."' is successfully registered.</p>";
 	}
 }
+
+
 ?>

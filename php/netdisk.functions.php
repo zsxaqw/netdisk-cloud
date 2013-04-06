@@ -5,6 +5,7 @@
  * writeable for instance. Next line will act on an ajax request. 
  * post vars should be ndasfunction=ndasFunctionName & var(s) 
  * 
+ * testCurrentUserSudoAbilities
  * ndasSetBlockDeviceScheduler 
  * ndasShowDiskInformation
  * ndasGetRegisteredNameFromDevice
@@ -18,6 +19,103 @@
  */
 $ndasAjaxRequest = isset($_POST['ndasAjaxFunction']) ? $_POST['ndasAjaxFunction'] : null;
 
+
+/* See if the current user has permission to perform tasks */
+function testCurrentUserSudoAbilities(){
+	
+	include('config.php');
+	$webUser = get_current_user();
+	$webRootPath = $_SERVER['DOCUMENT_ROOT'] . "/$INSTALL_DIR/";
+	$sudoErrors = 0;
+	$fatal_errors = array();
+
+	$all_commands = array(
+		'ndasadmin' => '/usr/sbin/ndasadmin',
+		'mount' => '/bin/mount',
+		'umount' => '/bin/umount',
+		'blkid' => '/sbin/blkid',
+		'chown' => '/bin/chown',
+		'ntfs-3g' => '/bin/ntfs-3g',
+		'ntfs-3g.probe' => '/bin/ntfs-3g.probe',
+		'setscheduler' => $webRootPath.'php/setscheduler.php'
+		);
+
+	/* see if the command programs exist. */
+	foreach($all_commands as $ack => $acv){	
+		if(!is_file($acv)){
+			$fatal_errors[$ack] = "$ack command program could not be found at $acv";
+			$message = date('Y-m-d H:i:s'). "|testCurrentUserSudoAbilities|missing|$acv.\n";
+			ndasPhpLogger(1,$message);
+			unset($all_commands[$ack]);
+		}
+	}
+
+	/* setscheduler is just a php file */
+	unset($all_commands['setscheduler']);
+	
+	// Missing command programs are noted, now test if user has sudo privileges
+
+	foreach($all_commands as $ack => $acv){	
+		$command = "sudo -l $acv 2>&1";
+		$message = date('Y-m-d H:i:s'). "|testPermissions|attempt|$command.\n";
+		ndasPhpLogger(5,$message);
+		exec($command,$results,$return);
+		if ($return > 0) {
+			$sudoErrors ++;
+			$message = date('Y-m-d H:i:s'). "|testSudoPermissions|failed|$command.\n";
+			ndasPhpLogger(1,$message);
+			$fatal_errors[$ack] = "sudo -l $acv returned: $return";
+			foreach ($results as $v ){
+				// log any errors returned by the system 
+				$message = date('Y-m-d H:i:s'). "|testSudoPermissions|failed|output|$v.\n";
+				ndasPhpLogger(1,$message);
+				$fatal_errors[$ack] .= "|$v";
+			}
+		} 
+		unset($results);
+	}
+	
+	
+	if (count($fatal_errors) > 0){
+		echo "<h2>";
+		if (count($fatal_errors) === 1){	
+			echo "Fatal Error!";
+		} else if (count($fatal_errors) > 1) {	
+			echo "Fatal Errors!"; 
+		}
+		
+		echo "</h2>
+			<pre> ";
+		
+		foreach($fatal_errors as $k => $v){
+			echo "	 $k: $v\n";
+		}
+		
+		echo "</pre>";
+	}
+	
+	if($sudoErrors > 0){
+		echo "<h2>Permission Errors!</h2>";
+		echo "<pre>
+	/* Running as $webUser
+	 * Running in $webRootPath
+	 * $webUser needs permission to use some commands that manage NDAS Devices.
+	 * To grant proper permission, run 'visudo' as the root user, and add the
+	 * following section. Save and close 'visudo' then reload this page. */
+	
+	#************** NDAS Device Administrator Permissions ***************
+	# User indicated below can perform NDAS Administrator tasks
+	User_Alias NDASADMIN=$webUser
+
+	# Commands required to manage NDAS devices from NETDISK-CLOUD as NDASADMIN
+	Cmnd_Alias NDAS=/usr/sbin/ndasadmin,/bin/mount,/bin/umount,/sbin/blkid,/bin/chown,/bin/ntfs-3g,/bin/ntfs-3g.probe,". $webRootPath ."php/setscheduler.php
+
+	# Allow NDASADMIN to execute NDAS commands without a password
+	NDASADMIN ALL=(ALL:ALL) NOPASSWD: NDAS
+	#********** End of NDAS Device Administrator Permissions *************
+	</pre>";
+	}	
+}
 
 /* Change the kernel queue scheduler on the disk for performance evaluations */
 function ndasSetBlockDeviceScheduler($scheduler,$device){
@@ -570,12 +668,11 @@ if ($ndasAjaxRequest == 'ndasIsMountedVolumeWritable'){
 }
 
 /* Log errors from the web user to a local file using php's error_log 
-function. It will only record the log message if the log_level according
-to the global settings. */
+function. It will only record messages at the log_level set in config.php*/
 function ndasPhpLogger($log_level,$log_message){
 	include('./config.php');
 	$message_type = $PHP_LOG_TYPE; 
-	$error_log = "./netdisk.php.error.log";
+	$error_log = $LOCAL_LOG_FILE;
 	if( $log_level <= $ADMIN_LOG_LEVEL || $log_level <= $USER_LOG_LEVEL){
 		error_log($log_message, $message_type, $error_log);
 	}

@@ -288,7 +288,7 @@ if (! isset($_SESSION['AUTH'])){
 }
 
 if ( $_SESSION['AUTH'] != "TRUE")
-{                                             
+{                                
 	$userid = isset($_POST['userid'])? $_POST['userid'] : null;
 	$tpass = isset($_POST['password'])? $_POST['password'] : null;
 	if(!empty($tpass)) {

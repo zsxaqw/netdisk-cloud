@@ -15,7 +15,7 @@ if($_SESSION['USERGROUP'] == 'admin') {
 	}
 	function ndasOpsReg()
 	{
-		window.open('/cgi-bin/register.cgi','_regndas','width=300,height=300');
+		window.open('./register.php','_regndas','width=300,height=300');
 	}
 	function ndasOpsUnReg()
 	{
@@ -23,7 +23,7 @@ if($_SESSION['USERGROUP'] == 'admin') {
 	}
 	function ndasOpsRO()
 	{
-		window.open('/cgi-bin/enable_read.cgi','_rondas','width=300,height=300');
+		window.open('./enable_read.php','_rondas','width=300,height=300');
 	}
 	function ndasOpsRW()
 	{
@@ -75,6 +75,7 @@ if($_SESSION['USERGROUP'] == 'admin') {
 			echo "<tr><td>Name</td><td>Block Device</td><td>Key</td>";
 			echo "<td>Slot</td><td>Status</td><td>Connection</td><td>Actions</td></tr>";
 			while ( $line = fgets($ndas_devs, 1024) ) {
+				//echo "didda fgets: $count <br>";
 				if ( $count == 0 ) {
 					$count++;
 					continue;
@@ -88,9 +89,33 @@ if($_SESSION['USERGROUP'] == 'admin') {
 				$ndasversion = strtok(" \t\n");
 				$online = strtok(" \t\n");
 				$slots = trim(strtok("\t\n"));
-		
+
+				/* echo "gotda strtoks| line: $line<br>
+					$name<br>
+					$id<br>
+					$key<br>
+					$serial<br>
+					$ndasversion<br>
+					$online<br>
+					$slots<br>
+					ha ha<br>"	;
+				*/
+					
 				if ( $slots == "" ) { 
 					$slot = 'N/A';
+					echo "<tr><td>$name</td>
+						<td>Undetermined</td>
+						<td>$key</td>
+						<td>$slot</td>
+						<td>$online</td>
+						<td>Undetermined</td>
+						<td><form style='display:inline' name=unregister action=/cgi-bin/unregister.cgi method=GET
+								target='_unregndas' onSubmit='javascript:ndasOpsUnReg()'>";
+						  echo "<input value=Unregister type=submit>";               
+						  echo "<input name=name value=\"".$name."\" type=hidden>";   
+						  echo "</form>"; 
+						  echo "</td></tr>";
+
 				} else {
 					$slotArray=explode(" ",$slots);
 					foreach ($slotArray as $slot){
@@ -161,8 +186,8 @@ if($_SESSION['USERGROUP'] == 'admin') {
 						  echo "<td>";
 
 						  if ( $status == "Disabled" && $online == 'Online') {
-							  echo "<form style='display:inline' name=enable action=/cgi-bin/enable_read.cgi
-										target='_rondas' onSubmit='javascript:ndasOpsRO()'>";
+							  echo "<form style='display:inline' name=enable action=./enable_read.php
+										target='_rondas' onSubmit='javascript:ndasOpsRO()' method='post'>";
 							  echo "<input value='Enable RO' type=submit>";                   
 							  echo "<input name=slot value=\"".$slot."\" type=hidden>";   
 							  echo "</form>";                                          
@@ -181,7 +206,6 @@ if($_SESSION['USERGROUP'] == 'admin') {
 						} //if/else ( $status == "Enabled")
 					}//foreach ($slotArray as $slot)
 				}//else (slot != '')
-
 				$count++;
 			}
 		}
@@ -198,7 +222,7 @@ if($_SESSION['USERGROUP'] == 'admin') {
 		<td><span class="readBytesButtons"><button>Read NDAS File</button></span></td>
 		<td>&nbsp;</td></tr>
 	<tr><td colspan="3" >Or enter the ID, Key and Name below then click the "Register" button.</td><tr>
-	<form name='register' action='/cgi-bin/register.cgi' method=GET
+	<form name='register' action='./register.php' method=GET
 		target='_regndas' onSubmit='javascript:ndasOpsReg()'>
 	<tr><td>ID:
 		<input name=id1 id=id1 maxlength=5 size=5 type=text class="ndasid">-

@@ -26,7 +26,7 @@ if (empty($slot))
 <h2>Mount and Unmount the file systems.</h2>
 <table border=1>
 <tr><th>NDAS Device</th><th>Block Device</th><th>Label</th><th>FS Type</th><th>Mount Path</th><th>Action</th></tr>
-<?
+<?php
 $mount_path=array();
 $empty_pdirs=array();
 $empty_udirs=array();
@@ -68,13 +68,16 @@ for($i=0;$i<count($mount_path);$i++)
 <td><?=$d?></td>
 <td><?=$label?></td>
 <td><?=$type?></td>
-<? if ( $path == "") { 
-exec("find ".$TOP_MOUNTABLE_DIRECTORY."/ -maxdepth 3 -type d -empty", $empty_pdirs);
+<?php
+ if ( $path == "") { 
+exec("find ".$TOP_MOUNTABLE_DIRECTORY."/ -maxdepth $SUB_DIR_LEVELS -type d -empty", $empty_pdirs);
+sort($empty_pdirs);
 ?>
 <form style='display:inline' action='mount.php' method='get'
 		target='_mountndas' onSubmit='javascript:ndasMountVol()'>
 <td><select name="mount_path">
 <?php
+	
 	foreach($empty_pdirs as $pdir){
 	echo '<option value="'.$pdir.'">'.str_replace($TOP_MOUNTABLE_DIRECTORY."/","",$pdir).'</option>\n';
 	}

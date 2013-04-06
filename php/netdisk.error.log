@@ -1,0 +1,4 @@
+2013-04-06 10:35:26|enable_write.php|enablerw|failed|sudo /usr/sbin/ndasadmin enable -s 2 -o w 2>&1.
+2013-04-06 10:35:26|enable_write.php|enablerw|failed|enable: You did not provide a valid write key or slot 2 is exclusively accessed by other host..
+2013-04-06 10:35:26|enable_write.php|enablerw|failed|Execute the following command to send the request for the write permission..
+2013-04-06 10:35:26|enable_write.php|enablerw|failed|ndasadmin request -s 2.

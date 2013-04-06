@@ -7,7 +7,9 @@ How to:
 	Destination path is salted by encrpyted password. and saved in the file table.
 		user : ehcrpyted path
 	
-
+Required programs:
+	sudo, 
+	
 Sample visudo entries from a Debian based system where the webserver runs as www-data:
 
 User_Alias NDASADMIN=www-data
