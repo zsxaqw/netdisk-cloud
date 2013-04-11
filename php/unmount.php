@@ -10,7 +10,6 @@ $umount_devi=isset($_GET['umount_devi'])? $_GET['umount_devi'] : false;
 $umount_path=isset($_GET['umount_path'])? $_GET['umount_path'] : false;;
 $umount_slot=isset($_GET['umount_slot'])? $_GET['umount_slot'] : false;
 
-include('netdisk.functions.php');
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>

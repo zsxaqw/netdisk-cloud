@@ -63,7 +63,8 @@ else
 	$find = false;
 	
 	// Encrypting the password
-	$enc_pass=openssl_encrypt($adduserpw,$ENC_METHOD,$ENC_KEY,false,$ENC_16_CHAR_VECTOR);
+	require_once('passhash.php');
+	$enc_pass = PassHash::hash($moduserpw);
 	while(!feof($fp))
 	{
 		if(fscanf($fp," %s %s %s\n",$userid,$userpw,$usergrp) && $userid == $adduserid)

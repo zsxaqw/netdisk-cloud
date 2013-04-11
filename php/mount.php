@@ -23,7 +23,7 @@ function isEmptyDir($dir){
 </head>
 <body>
 <b>Mount NDAS:</b><br><br>
-<?
+<?php
 
 /* It must be a "ndas-*" device or we quit the script. */
 $needle='/dev/ndas-';
@@ -40,9 +40,10 @@ if ( strpos($mount_devi, $needle) >= 0 ) {
 				str_replace("$TOP_MOUNTABLE_DIRECTORY/", '', $mount_path)."<br>";
 			
 			/* use netdisk.function to find out if the partition is writeable */
-			$writeable = ndasIsBlockDeviceWritable($mount_devi);
-			if ($writeable == 'RW' || $writeable == 'RO'){
-				if ($writeable !== 'RW') {
+			$writeable = trim(ndasIsBlockDeviceWritable($mount_devi));
+			
+			if ($writeable === 'RW' || $writeable === 'RO'){
+				if ($writeable === 'RO') {
 					$ROMOUNT=" -o ro ";
 					echo "Mode: Read Only<br>";  
 				} else {
@@ -55,13 +56,8 @@ if ( strpos($mount_devi, $needle) >= 0 ) {
 
 				/* ntfs file system uses different mounting options. */
 				if ($mount_type === "ntfs") {
-	
-					/* Add RO option if needed. */
-					if ($writeable !== 'RW') {
-						$ROMOUNT=" -o ro ";
-					}
-						
-					$command ="sudo /bin/ntfs-3g $ROMOUNT $mount_devi $mount_path 2>&1";
+					$ntfs3g = findNtfs3g();
+					$command ="sudo $ntfs3g $ROMOUNT $mount_devi $mount_path 2>&1";
 					exec($command,$output,$return);
 					if ($return > 0) {
 						$message = date('Y-m-d H:i:s'). "|mount.php|failed 
@@ -76,64 +72,93 @@ if ( strpos($mount_devi, $needle) >= 0 ) {
 					
 				} else {
 					/* other file systems can use the standard mount command */
-					die("RESULT=`sudo /bin/mount -t $mount_type $mount_devi $mount_path 2>&1`");
-	/*					# If it is exX file system, there could be ownership problems.
-						# We have to see if this is a new disk. The owner must be set if it is.
-						# Otherwise, root will own the filesystem and we can't write data.
-						if [ $? -eq 0 ] ; then
-							IS_OWNER_ROOT=`ls -d $mount_path -l | cut -d' ' -f 3  2>&1`
-							if [ "$IS_OWNER_ROOT" = "root" ] ; then
+					# If it is exX file system, there could be ownership problems.
+					# We have to see if this is a new disk. The owner must be set if it is.
+					# Otherwise, root will own the filesystem and we can't write data.
+
+					$command ="sudo /bin/mount -t $mount_type $mount_devi $mount_path $ROMOUNT 2>&1";
+					exec($command,$output,$return);
+					if ($return > 0) {
+						$message = date('Y-m-d H:i:s'). "|mount.php|failed 
+							to mount $mount_devi on $mount_path\n";
+						foreach ($output as $v ){
+							$message .= date('Y-m-d H:i:s') .
+							"|mount.php|output|$v\n" ;
+						}
+						ndasPhpLogger(1,$message);
+						$SUCCESS=1;
+					} else {
+						
+						/* If the NDAS device is enabled read only, we are done, 
+						 * if not, we must check the ownership of the drive, and
+						 * make the web account the owner or there may be trouble
+						 * accessing files via web interfaces. 
+						 */ 
+						if (empty($ROMOUNT)) {
+							echo "<pre>";
+							echo print_r(posix_getpwuid(fileowner($mount_path )));
+							echo "</pre>";
+/*						IS_OWNER_ROOT=`ls -d $mount_path -l | cut -d' ' -f 3  2>&1`
+						if [ "$IS_OWNER_ROOT" = "root" ] ; then
+							CHANGE_OWNER=1
+						else
+							IS_GROUP_ROOT=`ls -d $mount_path -l | cut -d' ' -f 4  2>&1`
+							if [ "$IS_GROUP_ROOT" = "root" ] ; then
 								CHANGE_OWNER=1
+							fi				
+						fi
+						if [ $CHANGE_OWNER -eq 1 ] ; then
+							# Discover current apache username in case we neet to give
+							# ownership to the web server.
+							WWW=`ps aux | grep apache | grep -c www-data  2>&1` 
+							if [ $WWW -gt 0 ]; then
+								RESULT=`sudo /bin/chown www-data:www-data $mount_path  2>&1`
 							else
-								IS_GROUP_ROOT=`ls -d $mount_path -l | cut -d' ' -f 4  2>&1`
-								if [ "$IS_GROUP_ROOT" = "root" ] ; then
-									CHANGE_OWNER=1
-								fi				
-							fi
-							if [ $CHANGE_OWNER -eq 1 ] ; then
-								# Discover current apache username in case we neet to give
-								# ownership to the web server.
-								WWW=`ps aux | grep apache | grep -c www-data  2>&1` 
-								if [ $WWW -gt 0 ]; then
-									RESULT=`sudo /bin/chown www-data:www-data $mount_path  2>&1`
-								else
-									HTTPD=`ps aux | grep apache | grep -c httpd  2>&1`
-									if  [ $HTTPD -gt 0 ]; then
-										RESULT=`sudo /bin/chown httpd:httpd $mount_path  2>&1`
+								HTTPD=`ps aux | grep apache | grep -c httpd  2>&1`
+								if  [ $HTTPD -gt 0 ]; then
+									RESULT=`sudo /bin/chown httpd:httpd $mount_path  2>&1`
+								else 
+									NOBODY=`ps aux | grep apache | grep -c nobody  2>&1`
+									if [ $NOBODY -gt 0 ]; then
+										RESULT=`sudo /bin/chown nobody:nobody $mount_path  2>&1`
 									else 
-										NOBODY=`ps aux | grep apache | grep -c nobody  2>&1`
-										if [ $NOBODY -gt 0 ]; then
-											RESULT=`sudo /bin/chown nobody:nobody $mount_path  2>&1`
-										else 
-											ROOTAP=`ps aux | grep apache | grep -c root  2>&1`
-											if [ $ROOTAP -gt 0 ]; then
-												# already root so we don't need to change the owner. 
-												RESULT="WARN: Apache is root user."
-											else
-												RESULT="ERROR: Mounted, but ownership is not set."
-											fi
+										ROOTAP=`ps aux | grep apache | grep -c root  2>&1`
+										if [ $ROOTAP -gt 0 ]; then
+											# already root so we don't need to change the owner. 
+											RESULT="WARN: Apache is root user."
+										else
+											RESULT="ERROR: Mounted, but ownership is not set."
 										fi
 									fi
 								fi
 							fi
-							# See if that even worked
-							if [ "$RESULT" != "0" ]; then
-								SUCCESS=1
-							fi
-						else
+						fi
+						# See if that even worked
+						if [ "$RESULT" != "0" ]; then
 							SUCCESS=1
 						fi
-	
-			else
-				echo "ERROR: No Permission to mount device."
-			fi
-	*/
-					} /* if ntfs or not */
-			
-					if ($SUCCESS === 0 ) 
-						echo "<br>Success!<br>";
 					else
-						echo "<br>$RESULT<br>";
+						SUCCESS=1
+					fi
+	
+					else
+						echo "ERROR: No Permission to mount device."
+					fi
+*/
+					
+						} else {
+							$SUCCESS = 0;
+						} /* if exX and is read only device */
+					
+					}/* mounting the exX volume suceeded */ 
+						
+				} /* if ntfs or not */
+			
+				if ($SUCCESS === 0 ) 
+					echo "<br>Success!<br>";
+				else
+					echo "<br>$RESULT<br>";
+			
 			} else {
 				echo "Testing RW/RO for $mount_devi returned a problem. 
 				<br><br> $writeable <br>"; 

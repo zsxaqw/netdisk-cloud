@@ -1,4 +1,3 @@
-#!/bin/sh /usr/bin/php-wrapper
 <?php
 include ('auth.php');
 ?>
@@ -28,7 +27,7 @@ function delPDir()
 $ufile = "netdisk.dir";
 if(!file_exists($ufile))
 {
-	echo "<h3>folder information file is not exist: ".$ufile."</h3>";
+	echo "<h3>Folder information file does not exist: ".$ufile."</h3>";
 	exit;
 }
 $fp = fopen($ufile,"r");

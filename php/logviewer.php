@@ -22,7 +22,13 @@ if($_SESSION['USERGROUP'] == 'admin') {
 		}	
 	}
 	$log1 = file_get_contents($LOCAL_LOG_FILE);
-	echo '<h1>NDAS PHP Log</h1>
+	echo '<h2>NDAS PHP Log</h2>
+	<div style="padding-left:10px">
+		Local log file: '.	$LOCAL_LOG_FILE .'<br>
+		Admin log level: '. $ADMIN_LOG_LEVEL .'<br>
+		User log level: '. $USER_LOG_LEVEL .'<br>
+	</div>
+
 	<div class="admin-flash-message">'.$log_message.'</div>
 	<textarea style="width:97%;height:160px;">'.$log1.'</textarea>
 	<h2>Clear the PHP logs</h2>

@@ -11,7 +11,7 @@ if($_SESSION['USERGROUP'] == 'admin') {
 	echo "<script language='javascript'>
 	function ndasSlotInfo(url)
 	{
-		newwindow=window.open(url,'_infondas','width=400,height=400');
+		newwindow=window.open(url,'_infondas','width=460,height=350');
 	}
 	function ndasOpsReg()
 	{
@@ -19,7 +19,7 @@ if($_SESSION['USERGROUP'] == 'admin') {
 	}
 	function ndasOpsUnReg()
 	{
-		window.open('/cgi-bin/unregister.cgi','_unregndas','width=300,height=300');
+		window.open('./unregister.php','_unregndas','width=300,height=300');
 	}
 	function ndasOpsRO()
 	{
@@ -31,7 +31,7 @@ if($_SESSION['USERGROUP'] == 'admin') {
 	}
 	function ndasOpsDis()
 	{
-		window.open('/cgi-bin/disable.cgi','_disndas','width=300,height=300');
+		window.open('./disable.php','_disndas','width=300,height=300');
 	}
 	</script>";
 	echo '<div id="server-info">';
@@ -72,8 +72,8 @@ if($_SESSION['USERGROUP'] == 'admin') {
 		if ( !$ndas_devs ) {
 			echo "Unable to read NDAS device file.";
 		} else {
-			echo "<tr><td>Name</td><td>Block Device</td><td>Key</td>";
-			echo "<td>Slot</td><td>Status</td><td>Connection</td><td>Actions</td></tr>";
+			echo "<tr><th>Name</th><th>Block Device</th><th>Key</th>";
+			echo "<th>Slot</th><th>Status</th><th>Connection</th><th>Actions</th></tr>";
 			while ( $line = fgets($ndas_devs, 1024) ) {
 				//echo "didda fgets: $count <br>";
 				if ( $count == 0 ) {
@@ -100,6 +100,7 @@ if($_SESSION['USERGROUP'] == 'admin') {
 					$slots<br>
 					ha ha<br>"	;
 				*/
+				$blockdevice = NULL;
 					
 				if ( $slots == "" ) { 
 					$slot = 'N/A';
@@ -109,10 +110,10 @@ if($_SESSION['USERGROUP'] == 'admin') {
 						<td>$slot</td>
 						<td>$online</td>
 						<td>Undetermined</td>
-						<td><form style='display:inline' name=unregister action=/cgi-bin/unregister.cgi method=GET
-								target='_unregndas' onSubmit='javascript:ndasOpsUnReg()'>";
-						  echo "<input value=Unregister type=submit>";               
-						  echo "<input name=name value=\"".$name."\" type=hidden>";   
+						<td><form style='display:inline' name='unregister' action='./unregister.php'
+								target='_unregndas' onSubmit='javascript:ndasOpsUnReg()' method='post'>";
+						  echo "<input value='Unregister' type='submit'>";               
+						  echo "<input name='name' value=\"".$name."\" type='hidden'>";   
 						  echo "</form>"; 
 						  echo "</td></tr>";
 
@@ -122,16 +123,17 @@ if($_SESSION['USERGROUP'] == 'admin') {
 						echo '<tr><td>'.$name.'</td>'; 
 
 						/* Try to determine the block device file */
+						
 						$block_file = "/proc/ndas/slots/$slot/devname";
 						if ( is_file($block_file) && $handle = fopen($block_file, "r") ) {
 							$line = exec("cat $block_file");
 							if (!empty($line)){
-								$blockdev = strtok($line, " \t\n");
+								$blockdevice = strtok($line, " \t\n");
 								if($online === 'Online'){
 									$blockdev = '<a href="slotinfo.php?slot='.$slot.'" 
 										onClick="ndasSlotInfo(this.href); return false;"
 										title="Open the device detail window" 
-										target="_infondas">'.$blockdev.'</a>';
+										target="_infondas">'.$blockdevice.'</a>';
 								}						
 							} else {
 								$blockdev = "Unassigned";
@@ -171,36 +173,41 @@ if($_SESSION['USERGROUP'] == 'admin') {
 				
 							echo "<td>".$status."</td>";
 							echo "<td>";
-							echo "<form style='display:inline' action=manage.php method=get>";                 
-							echo "<input value=\"Manage partitions\" type=submit>"; 
-							echo "<input name=slot value=\"".$slot."\" type=hidden>";
+							echo "<form style='display:inline' action='manage.php' method='get'>";                 
+							echo "<input value=\"Manage partitions\" type='submit'>"; 
+							echo "<input name=slot value=\"".$slot."\" type='hidden'>";
 							echo "</form>"; 
-							echo "<form style='display:inline' action=/cgi-bin/disable.cgi method=get
-									target='_disndas' onSubmit='javascript:ndasOpsDis()'>";
-							echo "<input value=Disable type=submit>";
-							echo "<input name=slot value=\"".$slot."\" type=hidden>";
-							echo "</form>";                                                      
+							if (!ndasIsNdasDeviceMounted($devname_str)) {
+								echo "<form style='display:inline' action='disable.php' method='get'
+										target='_disndas' onSubmit='javascript:ndasOpsDis()'>";
+								echo "<input value='Disable' type='submit'>";
+								echo "<input name='slot' value=\"".$slot."\" type='hidden'>";
+								echo "<input name='device' value=\"".$devname_str."\" type='hidden'>";
+								echo "</form>";
+							}	                                                      
+
 							echo "</td>";
 						} else {
 							echo "<td>".$status."</td>";
 						  echo "<td>";
 
 						  if ( $status == "Disabled" && $online == 'Online') {
-							  echo "<form style='display:inline' name=enable action=./enable_read.php
+							  echo "<form style='display:inline' name='enablero' action=./enable_read.php
 										target='_rondas' onSubmit='javascript:ndasOpsRO()' method='post'>";
 							  echo "<input value='Enable RO' type=submit>";                   
 							  echo "<input name=slot value=\"".$slot."\" type=hidden>";   
 							  echo "</form>";                                          
-							  echo "<form style='display:inline' name='enable' action='./enable_write.php'
+							  echo "<form style='display:inline' name='enablerw' action='./enable_write.php'
 										target='_rwndas' onSubmit='javascript:ndasOpsRW()' method='post'>";
 							  echo "<input value='Enable RW' type=submit>";                   
 							  echo "<input name=slot value=\"".$slot."\" type=hidden>";   
 							  echo "</form>";                                          
 						  }
-						  echo "<form style='display:inline' name=disable action=/cgi-bin/unregister.cgi method=GET
-								target='_unregndas' onSubmit='javascript:ndasOpsUnReg()'>";
-						  echo "<input value=Unregister type=submit>";               
-						  echo "<input name=name value=\"".$name."\" type=hidden>";   
+						  echo "<form style='display:inline' name='unregister' action='./unregister.php'
+								target='_unregndas' onSubmit='javascript:ndasOpsUnReg()' method='post'>";
+						  echo "<input value='Unregister' type='submit'>";               
+						  echo "<input name='name' value=\"".$name."\" type=hidden>";   
+						  echo "<input name='slot' value=\"".$slot."\" type=hidden>";   
 						  echo "</form>"; 
 						  echo "</td></tr>";
 						} //if/else ( $status == "Enabled")
@@ -348,8 +355,7 @@ function readBlob(opt_startByte, opt_stopByte) {
 	echo "</table>
 	
 	</div>
-	<br>
-	<a href=admin.php>Admin</a>";
+	<br>";
 }
 else
 {

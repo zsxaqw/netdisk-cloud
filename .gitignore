@@ -1,0 +1,9 @@
+php/config.php
+php/config.blank.php
+php/config.new.default
+php/config.new.php
+php/config.php.old
+php/config.test.php
+php/netdisk.user.test
+php/showErrors.php
+*~

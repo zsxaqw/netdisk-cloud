@@ -13,7 +13,7 @@ if ( strlen($path_param) > 1 && strpos($path_param, '/', strlen($path_param) - 1
 }
 $dir=$path_param;
 if ( $dir == $WEB_ROOT || $dir == "$WEB_ROOT/" ){
-    die('Error: No permission to view.');
+    die('Error: No permission to view. $dir');
 }
 if ( $dir == "." ){ 
     die('Error: System subfolder.');
@@ -51,7 +51,7 @@ $currentUserName = "";
  
 /* 1) Allow if directory is public */
 if ( substr_count($dir,"$WEB_ROOT/public") > 0) { 
-	echo "ppublic";
+	echo "public";
 	$allowAccess = true; 
 } else {
 	/* 2) Allow if directory contains the user name in home */ 
@@ -62,13 +62,22 @@ if ( substr_count($dir,"$WEB_ROOT/public") > 0) {
 	}
 	
 	/* 3) Check for "allowed" in netdisk.dir */
+	
+	/* 4) Admin has unlimited access */
+	if ($_SESSION['USERGROUP'] === 'admin')
+		$allowAccess = true;
 	 
 }
  
-if ($allowAccess == true){
+if ($allowAccess == true) {
+
+	include('netdisk.functions.php');
+	$ndasmode = ndasIsMountedVolumeWritable($dir);
+
+	echo "<h3>Index of $visible_directory  (NDAS Mode $ndasmode)</h3>";
 	
 	?>
-	<h3>Index of <?php echo $visible_directory; ?></h3>
+		
 	<div class=list>
 	<table cellpadding=0 cellspacing=0>
 	<thead>
@@ -82,7 +91,7 @@ if ($allowAccess == true){
 	<?php
 	$dh = opendir($dir);
 	if ( !$dh ) {
-	    die("cant open dir");
+	    die("cannot open $dir");
 	}
 	while ( $entry = readdir($dh) )
 	{
@@ -157,31 +166,41 @@ if ($allowAccess == true){
 	</div>
 	<br>
 	<table>
-	<tr>
-	<td>
-	<form name=fup method=POST action=choose_file.php>
-	<input type=hidden name=path value=<?php echo base64_encode($path_param); ?>>
-	<input type=button value="Upload" onclick="javascript:upload()">
-	</form></td>
-	<td>
-	<form method=POST target=_cdir action=create_dir.php onSubmit="javascript:createDir()">
-	<input type=hidden name=path value=<?php echo base64_encode($path_param); ?>>
-	<input type=submit value="Create Directory">
-	</form></td>
-	<td><input type=button onclick="javascript:location.reload()" value=Refresh></td>
-	</tr>
-	</table>
-<? 
-}else {
-	echo "Access Denied.";
+		<tr>
+
+
+		<?php 
+		if($ndasmode === 'RW') :
+		?>
+			<td>
+			<form name=fup method=POST action=choose_file.php>
+			<input type=hidden name=path value=<?php echo base64_encode($path_param); ?>>
+			<input type=button value="Upload" onclick="javascript:upload()">
+			</form></td>
+			<td>
+			<form method=POST target=_cdir action=create_dir.php onSubmit="javascript:createDir()">
+			<input type=hidden name=path value=<?php echo base64_encode($path_param); ?>>
+			<input type=submit value="Create Directory">
+			</form></td>
+		<?php 
+		endif; 
+		?>
+		<td><input type=button onclick="javascript:location.reload()" value=Refresh></td>
+<?php 
+} else {
+	echo "Access Denied.
+		<br>
+	<table>
+		<tr>";
+
 } 
 ?>
-<form method=GET action=list.php>
-<input value="Back" type=submit>
-</form><br>
-<a href="logout.php">Logout</a> 
-<hr>
-<br><br><img src="http://ndas4linux.iocellnetworks.com/trac/files/ndas.for.linux.tux.100px.h.png">
-
-</body>
-</html>
+			<td><form method=GET action=list.php>
+			<input value="Go Back" type=submit>
+			</form></td>
+		</tr>
+	</table>
+<br>			
+<?php 
+include('footer.php');
+?>

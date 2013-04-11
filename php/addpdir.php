@@ -1,15 +1,10 @@
-#!/bin/sh /usr/bin/php-wrapper
 <?php
-session_start();
-// check admin
-$curuserid = $_SESSION['USERID'];
-if(!isset($curuserid) || empty($curuserid) || $curuserid !="admin")
-{
-	echo "<h3>You don't have the right permission.</h3>";
-	exit;
-}
-$ndirpath= $_POST['dirpath'];
-$ndirpw= $_POST['dirpw'];
+include('auth.php');
+include('is_admin.php');  
+
+
+$ndirpath = isset($_POST['dirpath'])? $_POST['dirpath'] : null;
+$ndirpw= isset($_POST['dirpw'])? $_POST['dirpw'] : null;
 
 if(empty($dirpath) || empty($dirpw))
 {

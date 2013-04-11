@@ -14,8 +14,20 @@ return $url;
 }
 $pageURL=curPageURL();
 
+if(is_file('config.php')){
+	
+	include('config.php');
 
-include('config.php');
+} else {
+	session_start();
+	$_SESSION['USERGROUP'] = 'admin';
+	$_SESSION['first_run'] = 'y';
+	include('config.default.guess.php');
+	include('header.php');
+	include('configuration.php');
+	die('NETDISK CLOUD INITIAL CONFIGURATION');
+}
+
 
 /* Test if the user is in the administrator group.
  * returns true or false */
@@ -53,9 +65,14 @@ function AuthUser($iuserid,$iuserpw)
 	{
 		if(fscanf($fp,"%s %s %s\n",$userid,$userpw,$usergrp))
 		{
+			echo "$userid == $iuserid ?<br>";
 			if($userid == $iuserid)
 			{
-				if($userpw == $iuserpw)
+				// check the password the user tried to login with
+				require('passhash.php');
+				echo "Check $userpw vs. $iuserpw";
+				if (PassHash::check_password($userpw, $iuserpw))  
+				//if($userpw == $iuserpw)
 				{
 					return true;
 				}
@@ -291,16 +308,10 @@ if ( $_SESSION['AUTH'] != "TRUE")
 {                                
 	$userid = isset($_POST['userid'])? $_POST['userid'] : null;
 	$tpass = isset($_POST['password'])? $_POST['password'] : null;
-	if(!empty($tpass)) {
-		$password=openssl_encrypt($tpass,$ENC_METHOD,$ENC_KEY,false,$ENC_16_CHAR_VECTOR);
-	} else {
-		$password = null;
-	}
 
-
-	if(!empty($userid))
+	if(!empty($userid) && !empty($tpass))
 	{
-		if(AuthUser($userid,$password))
+		if(AuthUser($userid,$tpass))
 		{
 			$_SESSION['AUTH'] = "TRUE";
 			$_SESSION['USERID'] = $userid;
@@ -330,7 +341,7 @@ if ( $_SESSION['AUTH'] != "TRUE")
 	<div id="main-nav">
 	<center>
 	<form name="authLoginForm" action="<?php echo $pageURL; ?>" method="POST">                                  
-	<h3>NETDISK CLOUD</h3>
+	<h3><?php echo $PAGE_TITLE; ?></h3>
 	<table>
 		<tr>
 			<td>User ID:</td><td><input type="text" name="userid"></td>

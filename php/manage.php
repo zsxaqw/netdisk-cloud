@@ -49,7 +49,6 @@ for($i=0;$i<count($mount_path);$i++)
 	$d=$mount_path[$i];
 	/* find the ndas device name */
 	$dev_serial=substr($mount_path[$i],10,8);
-	$dev_name=exec("cat /proc/ndas/devs | grep $dev_serial | cut -d' ' -f 1");
 
 	$mounted=exec("sudo /sbin/blkid $mount_path[$i]");
 	 if($mounted){
@@ -62,9 +61,11 @@ for($i=0;$i<count($mount_path);$i++)
 	$path=exec("cat /proc/mounts | grep '^".$d."' | cut -d' ' -f2");
 	$needle=$WEB_ROOT.$INSTALL_DIR."/";
 	$local_path=str_replace($needle,"",$path);
+	
+	$ndas_device = ndasGetNdasDeviceNameFromSerial($devname_str)
 ?>
 <tr>
-<td><?=$dev_name?></td>
+<td><?=$ndas_device?></td>
 <td><?=$d?></td>
 <td><?=$label?></td>
 <td><?=$type?></td>

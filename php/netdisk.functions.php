@@ -8,6 +8,7 @@
  * testCurrentUserSudoAbilities
  * ndasSetBlockDeviceScheduler 
  * ndasShowDiskInformation
+ * ndasGetNdasDeviceSerialNumberFromName	ex: 44812187
  * ndasGetRegisteredNameFromDevice
  * ndasGetRegisteredNameFromSlot
  * ndasGetDeviceNameFromSlot
@@ -17,26 +18,77 @@
  * 
  *
  */
-$ndasAjaxRequest = isset($_POST['ndasAjaxFunction']) ? $_POST['ndasAjaxFunction'] : null;
+$ndasAjaxRequest = isset($_REQUEST['ndasAjaxFunction']) ? $_REQUEST['ndasAjaxFunction'] : null;
 
+/* Use the device name or serial number to loof for mounted partitions */
+function ndasIsNdasDeviceMounted($ndas_dev){
+	
+	$is_mounted = FALSE;
+	
+	/* See if this device is mounted or not */
+	$command = "sudo /bin/mount | grep $ndas_dev 2>&1";
+	exec($command,$output,$return);
+	if ($return === 0) {
+		$is_mounted = TRUE;
+		$message = date('Y-m-d H:i:s'). "|ndasIsNdasDeviceMounted|$ndas_dev is listed in mount output.\n";
+		ndasPhpLogger(1, $message);
+		foreach ($output as $v ){
+			$message = date('Y-m-d H:i:s'). "|ndasIsNdasDeviceMounted|$v.\n";
+			ndasPhpLogger(5,$message);
+		}
+	}
+	return $is_mounted;
+}
 
+/* Need the NDAS Device name based on the serial number. */
+function ndasGetNdasDeviceNameFromSerial($serial_no) {
+	$return_this = "No NDAS Devices"; //no list in /proc/ndas/devices
+	if ($device_dir = opendir('/proc/ndas/devices')) {
+	    while (false !== ($device_name = readdir($device_dir))) {
+	        if ($device_name != "." && $device_name != "..") {
+	            $dev_serial = trim(file_get_contents('/proc/ndas/devices/'.$device_name.'/serial')); 
+	            if (strpos($serial_no, $dev_serial) !== FALSE){
+	            	$return_this = $device_name;
+	            	//echo $entry .": ". file_get_contents('/proc/ndas/devices/'.$entry.'/serial') ."<br>";
+	            }
+	        }
+	    } 
+	    if($return_this === "No NDAS Devices")
+	    	$return_this = "No match with $serial_no"; 	    	
+	    closedir($handle);
+	}
+	return $return_this;
+}
+//echo ndasGetNdasDeviceNameFromSerial('44812187');
+if ($ndasAjaxRequest == 'ndasGetNdasDeviceNameFromSerial'){
+	$serial = isset($_REQUEST['serial'])? $_REQUEST['serial'] : FALSE ;
+	if ( !$serial ) die("No Input");
+	die( ndasGetNdasDeviceNameFromSerial($serial) );	
+}
+	
 /* See if the current user has permission to perform tasks */
 function testCurrentUserSudoAbilities(){
 	
-	include('config.php');
+	if(is_file('config.php')){
+		include('config.php');
+	} else {
+		include('config.default.guess.php');
+	}
 	$webUser = get_current_user();
-	$webRootPath = $_SERVER['DOCUMENT_ROOT'] . "/$INSTALL_DIR/";
+	$webRootPath = $WEB_ROOT . $INSTALL_DIR . "/";
 	$sudoErrors = 0;
 	$fatal_errors = array();
 
+	$ntfs3g = findNtfs3g();
+	
 	$all_commands = array(
 		'ndasadmin' => '/usr/sbin/ndasadmin',
 		'mount' => '/bin/mount',
 		'umount' => '/bin/umount',
 		'blkid' => '/sbin/blkid',
 		'chown' => '/bin/chown',
-		'ntfs-3g' => '/bin/ntfs-3g',
-		'ntfs-3g.probe' => '/bin/ntfs-3g.probe',
+		'ntfs-3g' => $ntfs3g,
+		'ntfs-3g.probe' => "$ntfs3g.probe",
 		'setscheduler' => $webRootPath.'php/setscheduler.php'
 		);
 
@@ -108,7 +160,7 @@ function testCurrentUserSudoAbilities(){
 	User_Alias NDASADMIN=$webUser
 
 	# Commands required to manage NDAS devices from NETDISK-CLOUD as NDASADMIN
-	Cmnd_Alias NDAS=/usr/sbin/ndasadmin,/bin/mount,/bin/umount,/sbin/blkid,/bin/chown,/bin/ntfs-3g,/bin/ntfs-3g.probe,". $webRootPath ."php/setscheduler.php
+	Cmnd_Alias NDAS=/usr/sbin/ndasadmin,/bin/mount,/bin/umount,/sbin/blkid,/bin/chown, $ntfs3g, $ntfs3g.probe,". $webRootPath ."php/setscheduler.php
 
 	# Allow NDASADMIN to execute NDAS commands without a password
 	NDASADMIN ALL=(ALL:ALL) NOPASSWD: NDAS
@@ -275,6 +327,34 @@ if ($ndasAjaxRequest == 'ndasShowDiskInformation'){
 	die( ndasShowDiskInformation($post_slot) );	
 }
 
+/* Try to get the serial number from the name */
+function ndasGetNdasDeviceSerialNumberFromName($dev_name) {
+
+	/* this only returns the 8 digit part of the number. 
+	 * Ex: 44812788
+	 * You may have to add /dev/ndas- or other identity parts on the fly. 
+	 */
+	include('./config.php'); 
+	$output = Array();
+	$return = null;
+
+	$serial_number = file_get_contents("/proc/ndas/devices/$dev_name/serial");
+	if ($serial_number) {
+		return $serial_number;
+	} else {
+		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|ndasGetNdasDeviceSerialNumberFromName|Failed to read /proc/ndas/devices/$dev_name/serial.\n";
+		ndasPhpLogger(5,$message);
+		return FALSE;
+	}				
+}
+//echo  ndasGetNdasDeviceSerialNumberFromName('ndas_device_1') 
+if ($ndasAjaxRequest == 'ndasGetNdasDeviceSerialNumberFromName'){
+	$post_name = isset( $_POST['name'] ) ? $_POST['name'] : null;
+	if (!$post_name) die("No Input");
+	die( ndasGetDeviceNameFromSlot($post_name) );	
+}
+
+
 
 /* Return the Registered device name from the /dev/ndas-name-# */
 function ndasGetRegisteredNameFromDevice($func_device) {
@@ -380,6 +460,19 @@ if ($ndasAjaxRequest == 'ndasGetDeviceNameFromSlot'){
 	die( ndasGetDeviceNameFromSlot($post_slot) );	
 }
 
+/* ntfs-3g has been installed in various places. Rather than mess around
+ * we are just going to look for it in some common spots. */
+function findNtfs3g(){
+	
+	if (is_file('/usr/bin/ntfs-3g'))
+		$ntfs3g = '/usr/bin/ntfs-3g';
+	else if (is_file('/bin/ntfs-3g'))
+		$ntfs3g = '/bin/ntfs-3g';
+	else 
+		$ntfs3g = '/bin/ntfs-3g';
+		
+	return $ntfs3g;
+}
 
 /* Use ntfs-3g.probe to determine if the ndas device is enabled ro or rw */
 function ndasIsDeviceEnabledRwOrRo($device) {
@@ -411,7 +504,8 @@ function ndasIsDeviceEnabledRwOrRo($device) {
 		return "Error: 2 $device" ;
 	} 
 	
-	$command = "sudo /bin/ntfs-3g.probe --readwrite /dev/$device 2>&1";
+	$ntfs3g = findNtfs3g();
+	$command = "sudo $ntfs3g.probe --readwrite /dev/$device 2>&1";
 	exec($command,$output,$return);
 	if ($return > 0) {
 		if ($return == 19){
@@ -508,7 +602,8 @@ function ndasIsBlockDeviceWritable($device){
 	 * the volume is RW. So we are doing several tests.
 	 */
 	if ($partitionFileSystemType == 'ntfs') {
-		$command = "sudo /bin/ntfs-3g.probe --readwrite $partitionToTest 2>&1";
+		$ntfs3g = findNtfs3g();
+		$command = "sudo $ntfs3g.probe --readwrite $partitionToTest 2>&1";
 		exec($command,$output,$return);
 		
 		if ($return == 19){
@@ -543,7 +638,8 @@ function ndasIsBlockDeviceWritable($device){
 			/* there is some reason that this partition is RO. So test if device 
 			 * can be mounted RO. It is safe even if errors on RW. 
 			 */
-			$command = "sudo /bin/ntfs-3g.probe --readonly $partitionToTest 2>&1";
+			$ntfs3g = findNtfs3g();
+			$command = "sudo $ntfs3g.probe --readonly $partitionToTest 2>&1";
 			exec($command,$output,$return);
 			if ($return == 0) 
 				return 'RO';
@@ -556,8 +652,7 @@ function ndasIsBlockDeviceWritable($device){
 			
 	} else {
 		/* create a temp folder */  
-		$tempMountingDirectory = $WEB_ROOT . $INSTALL_DIR . 
-			str_replace('/dev', '', $device); 
+		$tempMountingDirectory = "/tmp" . str_replace('/dev', '', $device); 
 		if (!is_dir($tempMountingDirectory) ) {
 			if (!mkdir($tempMountingDirectory,0777)){
 				$message = date('Y-m-d H:i:s') . 
@@ -671,7 +766,7 @@ if ($ndasAjaxRequest == 'ndasIsMountedVolumeWritable'){
 function. It will only record messages at the log_level set in config.php*/
 function ndasPhpLogger($log_level,$log_message){
 	include('./config.php');
-	$message_type = $PHP_LOG_TYPE; 
+	$message_type = isset($PHP_LOG_TYPE)? $PHP_LOG_TYPE : 3; 
 	$error_log = $LOCAL_LOG_FILE;
 	if( $log_level <= $ADMIN_LOG_LEVEL || $log_level <= $USER_LOG_LEVEL){
 		error_log($log_message, $message_type, $error_log);

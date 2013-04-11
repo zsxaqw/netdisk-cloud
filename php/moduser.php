@@ -59,7 +59,8 @@ if(!empty($moduserid))
 		// modify user info
 		/* encrypt the password if it was changed. */
 		if (!empty($moduserpw)){
-			$arruserpw[$index] = openssl_encrypt($moduserpw,$ENC_METHOD,$ENC_KEY,false,$ENC_16_CHAR_VECTOR);
+			require_once('passhash.php');
+			$arruserpw[$index] = PassHash::hash($moduserpw);
 		}
 
 		/* change the users group if needed */
@@ -82,7 +83,7 @@ if(!empty($moduserid))
 		//
 		if($index < 0)
 		{
-			echo "<h3>User ID '".$moduserid."' is not exist.</h3>";
+			echo "<h3>User ID '".$moduserid."' does not exist.</h3>";
 		}
 		else
 		{
@@ -90,7 +91,7 @@ if(!empty($moduserid))
 				opener.location.href='user_manage.php'
 				//self.close();
 				</script>";
-			echo "<p>User ID '".$moduserid."' is successfully modified.</p>";
+			echo "<p>User ID '".$moduserid."' has been updated.</p>";
 		}
 	}
 	else /* display the existing values in the modify form. */

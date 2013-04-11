@@ -13,6 +13,7 @@ $showslot = isset($_GET['slot'])? $_GET['slot'] : die("Invalid Slot");
 </head>
 <body>
 <center>
+<h2>NDAS Drive Details</h2>
 <?php
 
 
