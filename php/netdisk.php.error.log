@@ -51,3 +51,37 @@
 2013-04-11 20:16:09|ndasIsNdasDeviceMounted|/dev/ndas-44812187-0p1 on /media/351une-1 type ext2 (rw).
 2013-04-11 20:16:09|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|/dev/ndas-44812187-1
 2013-04-11 20:16:09|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|Error opening '/dev/ndas-44812187-1': Read-only file system
+2013-04-11 21:26:31|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|/dev/ndas-44812187-0
+2013-04-11 21:26:31|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|NTFS signature is missing.
+2013-04-11 21:26:31|ndasIsNdasDeviceMounted|ndas-44812187-0 is listed in mount output.
+2013-04-11 21:26:31|ndasIsNdasDeviceMounted|/dev/ndas-44812187-0p1 on /media/351une-1 type ext2 (rw).
+2013-04-11 21:26:31|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|/dev/ndas-44812187-1
+2013-04-11 21:26:31|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|Error opening '/dev/ndas-44812187-1': Read-only file system
+2013-04-12 08:36:34|testPermissions|attempt|sudo -l /usr/sbin/ndasadmin 2>&1.
+2013-04-12 08:36:34|testPermissions|attempt|sudo -l /bin/mount 2>&1.
+2013-04-12 08:36:34|testPermissions|attempt|sudo -l /bin/umount 2>&1.
+2013-04-12 08:36:34|testPermissions|attempt|sudo -l /sbin/blkid 2>&1.
+2013-04-12 08:36:34|testPermissions|attempt|sudo -l /bin/chown 2>&1.
+2013-04-12 08:36:34|testPermissions|attempt|sudo -l /usr/bin/ntfs-3g 2>&1.
+2013-04-12 08:36:34|testPermissions|attempt|sudo -l /usr/bin/ntfs-3g.probe 2>&1.
+2013-04-12 09:18:02|testPermissions|attempt|sudo -l /usr/sbin/ndasadmin 2>&1.
+2013-04-12 09:18:02|testPermissions|attempt|sudo -l /bin/mount 2>&1.
+2013-04-12 09:18:02|testPermissions|attempt|sudo -l /bin/umount 2>&1.
+2013-04-12 09:18:02|testPermissions|attempt|sudo -l /sbin/blkid 2>&1.
+2013-04-12 09:18:02|testPermissions|attempt|sudo -l /bin/chown 2>&1.
+2013-04-12 09:18:02|testPermissions|attempt|sudo -l /usr/bin/ntfs-3g 2>&1.
+2013-04-12 09:18:02|testPermissions|attempt|sudo -l /usr/bin/ntfs-3g.probe 2>&1.
+2013-04-12 09:18:31|testPermissions|attempt|sudo -l /usr/sbin/ndasadmin 2>&1.
+2013-04-12 09:18:31|testPermissions|attempt|sudo -l /bin/mount 2>&1.
+2013-04-12 09:18:31|testPermissions|attempt|sudo -l /bin/umount 2>&1.
+2013-04-12 09:18:31|testPermissions|attempt|sudo -l /sbin/blkid 2>&1.
+2013-04-12 09:18:32|testPermissions|attempt|sudo -l /bin/chown 2>&1.
+2013-04-12 09:18:32|testPermissions|attempt|sudo -l /usr/bin/ntfs-3g 2>&1.
+2013-04-12 09:18:32|testPermissions|attempt|sudo -l /usr/bin/ntfs-3g.probe 2>&1.
+2013-04-12 09:20:51|testPermissions|attempt|sudo -l /usr/sbin/ndasadmin 2>&1.
+2013-04-12 09:20:51|testPermissions|attempt|sudo -l /bin/mount 2>&1.
+2013-04-12 09:20:52|testPermissions|attempt|sudo -l /bin/umount 2>&1.
+2013-04-12 09:20:52|testPermissions|attempt|sudo -l /sbin/blkid 2>&1.
+2013-04-12 09:20:52|testPermissions|attempt|sudo -l /bin/chown 2>&1.
+2013-04-12 09:20:52|testPermissions|attempt|sudo -l /usr/bin/ntfs-3g 2>&1.
+2013-04-12 09:20:52|testPermissions|attempt|sudo -l /usr/bin/ntfs-3g.probe 2>&1.

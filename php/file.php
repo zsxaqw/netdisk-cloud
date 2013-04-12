@@ -1,7 +1,9 @@
 <?php
 include ("auth.php");
 
-$path_param=urldecode(base64_decode($_GET['path']));
+$encoded_path = $_GET['path'];
+$decoded_path = base64_decode($_GET['path']);
+$path_param=urldecode($decoded_path);
 if ( !isset($_GET['path'])) {
     $path_param=urldecode($_POST['path']);
 }
@@ -18,6 +20,81 @@ if ( $dir == $WEB_ROOT || $dir == "$WEB_ROOT/" ){
 if ( $dir == "." ){ 
     die('Error: System subfolder.');
 }
+
+if ( !is_dir($dir) ) { 
+
+/* get the file to a web accessible location for display 
+
+ I think it should make a user name folder in the symlink directory.
+ Create the symlink.
+ Forward the browser to the link.
+ If the NDAS Device is disconnected, all the files must be unlinked.
+ Also, unlink all the files when a user logs out.
+ Possibly, unlink all files everytime, or delete the folder recursively
+ each time a new directory view is loaded.
+  
+*/
+
+$target = $decoded_path;
+$link = "$encoded_path". 
+	substr($decoded_path, strrpos($decoded_path, '.'), strlen($decoded_path));
+	
+$files_link_directory = $WEB_ROOT . $INSTALL_DIR .'/files';
+
+//Encrypted name file link 
+//$file_http_link = $HTTP_SITE . $INSTALL_DIR .'/files/' .$link;
+
+/* Maybe use the original file name as the link? 
+ * It looks better for downloads 
+ */
+$real_name_link = substr($decoded_path, (strrpos($decoded_path, '/') + 1), strlen($decoded_path));
+$file_http_link = $HTTP_SITE . $INSTALL_DIR .'/files/' .$real_name_link;
+
+chdir($files_link_directory);
+
+if ($handle = opendir('.')) {
+    while (false !== ($entry = readdir($handle))) {
+        if ($entry != "." && $entry != "..") {
+			if (is_link($entry)) 
+				unlink($entry);        
+		}
+    }
+    closedir($handle);
+}
+
+symlink($target, $real_name_link); // Encrypted link version symlink($target, $link);
+header("location: $file_http_link");
+
+
+/* Check if there is a directory for this user. Make one if not.
+	mkdir -p files_link_directory/username
+	chdir($files_link_directory/username);
+	
+	Delete all existing links:
+	rm -f *
+	
+	make the new link
+	
+	Forward the browser to the new page. 
+*/
+
+
+/*   
+$file_info = "encoded_path: $encoded_path<br>
+decoded_path: $decoded_path<br>
+dir: $dir<br>
+path_param: $path_param<br>link: $link<br>";
+
+echo "Some Attempt<br>";
+echo "chdir('$files_link_directory')<br>";
+//echo "symlink($target, $link)<br>";
+echo "symlink($target, $real_name_link)<br>";
+
+echo "header('location: $file_http_link')<br><br>";
+die($file_info);
+*/
+}
+	
 
 $visible_directory=str_replace($TOP_MOUNTABLE_DIRECTORY,'',$dir);
 
@@ -41,7 +118,16 @@ function upload()
 </script>
 <?php
 if ( !is_dir($dir) ) { 
-    die("No such directory - ".$path_param);
+
+	/* get the file to a web accessible location for display */
+
+	$temp = tmpfile();
+	fwrite($temp, file_get_contents($path_param));
+	fseek($temp, 0);
+	echo fread($temp,  filesize($temp));
+	fclose($temp); // this removes the file
+	
+    die("File: ".$path_param);
 }
 
 /* Get the username based on the session id and test if the user has 
@@ -152,9 +238,10 @@ if ($allowAccess == true) {
 		if(	!$_SESSION['SHOW_HIDDEN']  && strpos($entry,".") === 0 ) {
 			continue;
 		}
-	
+	/*<tr><td><a href="<?php echo str_replace($WEB_ROOT,'',$e_file_param); ?>">
+	  */
 	?>
-	  <tr><td><a href="<?php echo str_replace($WEB_ROOT,'',$e_file_param); ?>">
+	  <tr><td><a href="./file.php?path=<?php echo base64_encode($e_file_param); ?>">
 	                <?php echo $entry; ?></a></td>
 	      <td><?php echo filesize($e_file); ?></td>
 	      <td><?php echo filetype($e_file); ?></td>

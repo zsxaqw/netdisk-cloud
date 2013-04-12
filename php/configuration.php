@@ -12,7 +12,7 @@ $admin = false;
 if($_SESSION['USERGROUP'] == 'admin') {
 	include('netdisk.functions.php');
 	echo "<h1>NDAS Administration Configuration</h1>";
-
+	
 	if (isset($_SESSION['config_message'])){
 		echo '<div style="text-align:center; font-color:red">'. $_SESSION['config_message'] .'</div>';
 		unset($_SESSION['config_message'] );
@@ -20,6 +20,16 @@ if($_SESSION['USERGROUP'] == 'admin') {
 	/* Test for missing programs and user sudo abilities */
 	testCurrentUserSudoAbilities();
 
+	echo "<h2>Todo: </h2> 
+		<ul>
+			<li>Add config for max file size upload.</li>
+			<li>Mabye config for file types</li>
+			<li>Each user needs their own folder for downloads</li>
+			<li>Have take ownership of file / all files button</li>
+			<li>Mabye a chmod section with recursive power</li>
+		</ul>
+	 <br>";
+	 
 	echo "<h2>Change configuration settings</h2>";
 ?>
 <script type="text/javascript" >
