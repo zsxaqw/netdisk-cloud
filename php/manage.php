@@ -16,7 +16,7 @@ if (empty($slot))
 <script language='javascript'>
 	function ndasUnmountVol()
 	{
-		window.open('unmount.php','_unmountndas','width=300,height=300');
+		window.open('umount.php','_unmountndas','width=300,height=300');
 	}
 	function ndasMountVol()
 	{
@@ -96,11 +96,11 @@ $showdir=base64_encode($path);
 ?>
 <td><a href="file.php?path=<?=$showdir?>"><?=$local_path?></a></td>
 <td>
-<form style='display:inline' action='unmount.php' method='get'
+<form style='display:inline' action='umount.php' method='get'
 		target='_unmountndas' onSubmit='javascript:ndasUnmountVol()'>
 <input name="umount_slot" value="<?=$slot?>" type="hidden">
 <input name="umount_devi" value="<?=$d?>" type="hidden">
-<input name="umount_path" value="<?=$local_path?>" type="hidden">
+<input name="umount_path" value="<?=$path?>" type="hidden">
 <input value="Unmount" type="submit">
 </form>
 <? } ?>

@@ -26,25 +26,32 @@ if (userIsAdmin()) {
 	$return = null;
 	$retval = '';
 	$message = '';
-		
+
 	/* see if the path is a mount point */
-	$command = "mount | grep $device 2>&1";
+	$command = "mountpoint $path 2>&1";
 	exec($command,$output,$return);
 	if ($return > 0) {
 		$message = "|umount.php|$path is not used as a mount point at this time.";
 		if ($ADMIN_LOG_LEVEL >= 2){
-			ndasErrorLogger(2,$message);
+			ndasPhpLogger(2,$message);
 		}
 		die("Error: exec returned > 0.<br>$message");
 	}
 	
-	/* make sure the device is mounted on the mount point. */
-	if (strpos($output[0], $device) === false) {
-		$message = "|umount.php|$device is not mounted on $path";
+	/* make sure the device is mounted on the mount point.*/ 
+	$command = "mount | grep $path 2>&1";
+	exec($command,$output,$return);
+
+	if ($return > 0) {
+		if(strpos($output[0], $device) === false){
+			$message = "|umount.php|$device is not mounted on $path";
+		} else {
+			$message = "grep for $path failed in search of mounted devices.";		
+		} 
 		if ($ADMIN_LOG_LEVEL >= 2){
-			ndasErrorLogger(2,$message);
+			ndasPhpLogger(2,$message);
 		}
-		die("Error: strpos failed.<br>$message.<br>int: $int<br>".$output[0]);
+		die("Error: strpos failed.<br>$message");
 	} 
 
 	/* see if the path is being used by any process obvious 
@@ -53,14 +60,15 @@ if (userIsAdmin()) {
 	 * it is in an open window, it will not be shown in use, unless
 	 * some I/O operation is going on at the very moment we make 
 	 * this command. It must be based on the way NDAS is connecting
-	 * this device. 
-	 */
+	 * this device.
+	 */ 
+	 
 	$command = "lsof $path 2>&1";
 	exec($command,$output,$return);
 	if ($return == 0) {
 		$message = "|umount.php|$path is apparently in use at this time.";
 		if ($ADMIN_LOG_LEVEL >= 2){
-			ndasErrorLogger(2,$message);
+			ndasPhpLogger(2,$message);
 			foreach($output as $v){
 				ndasErrorLogger(2,"|umount.php|$v");
 				$message .= "<br>$v";
@@ -70,14 +78,14 @@ if (userIsAdmin()) {
 	}
 
 	/* try unmounting */
-	$command = "umount $device 2>&1";
+	$command = "sudo /bin/umount $device 2>&1";
 	exec($command,$output,$return);
 	if ($return > 0) {
 		$message = "|umount.php|Unmounting failed.";
 		if ($ADMIN_LOG_LEVEL >= 1){
-			ndasErrorLogger(1,$message);
+			ndasPhpLogger(1,$message);
 			foreach($output as $v){
-				ndasErrorLogger(2,"|umount.php|$v");
+				ndasPhpLogger(2,"|umount.php|$v");
 				$message .= "<br>$v";
 			}
 		}
@@ -91,7 +99,7 @@ $refpage = $_SERVER['HTTP_REFERER'];
 
 <script>
 	opener.location.href='<?php echo $refpage; ?>'
-	self.close()
+	
 </script>
 
 <?php		
