@@ -6,7 +6,7 @@
 
 include('auth.php');
 
-$path = urldecode($_POST['path']);
+$path = base64_decode($_POST['path']);
 $uploaddir = $path.'/' ;
 
 if( empty($path) )

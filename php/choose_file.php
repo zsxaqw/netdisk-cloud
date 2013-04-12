@@ -1,6 +1,10 @@
 <?php 
 include('auth.php');
-$path = isset($_POST['path'])? base64_decode($_POST['path']) : null;
+$postpath = isset($_POST['path'])? $_POST['path'] : null;
+echo "pp:$postpath<br>";
+$path = base64_decode($postpath);
+echo "dp:$path<br>";
+
 if ($path == null){
 	die('Need Destination.');
 }
@@ -33,7 +37,7 @@ $visible_directory=str_replace($TOP_MOUNTABLE_DIRECTORY,'',$path);
 
       function uploadFile() {
         var fd = new FormData();
-        fd.append("path", "<?php echo $path; ?>");
+        fd.append("path", "<?php echo $postpath; ?>");
         fd.append("fileToUpload", document.getElementById('fileToUpload').files[0]);
        var xhr = new XMLHttpRequest();
         xhr.upload.addEventListener("progress", uploadProgress, false);
@@ -57,7 +61,7 @@ $visible_directory=str_replace($TOP_MOUNTABLE_DIRECTORY,'',$path);
       function uploadComplete(evt) {
         /* This event is raised when the server send back a response */
         alert(evt.target.responseText);
-		opener.location.href='file.php?path=<?php echo $path; ?>';
+		opener.location.href='file.php?path=<?php echo $postpath; ?>';
       }
 
       function uploadFailed(evt) {

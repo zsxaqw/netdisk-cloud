@@ -1,0 +1,53 @@
+2013-04-11 10:26:53|testPermissions|attempt|sudo -l /usr/sbin/ndasadmin 2>&1.
+2013-04-11 10:26:53|testPermissions|attempt|sudo -l /bin/mount 2>&1.
+2013-04-11 10:26:53|testPermissions|attempt|sudo -l /bin/umount 2>&1.
+2013-04-11 10:26:53|testPermissions|attempt|sudo -l /sbin/blkid 2>&1.
+2013-04-11 10:26:53|testPermissions|attempt|sudo -l /bin/chown 2>&1.
+2013-04-11 10:26:53|testPermissions|attempt|sudo -l /usr/bin/ntfs-3g 2>&1.
+2013-04-11 10:26:53|testPermissions|attempt|sudo -l /usr/bin/ntfs-3g.probe 2>&1.
+2013-04-11 10:26:56|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|/dev/ndas-44812187-0
+2013-04-11 10:26:56|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|NTFS signature is missing.
+2013-04-11 10:26:56|ndasIsNdasDeviceMounted|ndas-44812187-0 is listed in mount output.
+2013-04-11 10:26:56|ndasIsNdasDeviceMounted|/dev/ndas-44812187-0p1 on /media/351une-1 type ext2 (rw).
+2013-04-11 10:26:56|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|/dev/ndas-44812187-1
+2013-04-11 10:26:56|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|Error opening '/dev/ndas-44812187-1': Read-only file system
+2013-04-11 10:28:04|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|/dev/ndas-44812187-0
+2013-04-11 10:28:04|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|NTFS signature is missing.
+2013-04-11 10:28:04|ndasIsNdasDeviceMounted|ndas-44812187-0 is listed in mount output.
+2013-04-11 10:28:04|ndasIsNdasDeviceMounted|/dev/ndas-44812187-0p1 on /media/351une-1 type ext2 (rw).
+2013-04-11 10:28:04|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|/dev/ndas-44812187-1
+2013-04-11 10:28:04|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|Error opening '/dev/ndas-44812187-1': Read-only file system
+2013-04-11 10:29:24|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|/dev/ndas-44812187-0
+2013-04-11 10:29:24|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|NTFS signature is missing.
+2013-04-11 10:29:24|ndasIsNdasDeviceMounted|ndas-44812187-0 is listed in mount output.
+2013-04-11 10:29:24|ndasIsNdasDeviceMounted|/dev/ndas-44812187-0p1 on /media/351une-1 type ext2 (rw).
+2013-04-11 10:29:24|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|/dev/ndas-44812187-1
+2013-04-11 10:29:24|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|Error opening '/dev/ndas-44812187-1': Read-only file system
+2013-04-11 20:06:45|register.php|attempt|sudo /usr/sbin/ndasadmin register 5KKHG-267E8-JQJM8-J7GEK-U1KLQ --name "code-351" 2>&1.
+2013-04-11 20:06:45|register.php|returned|0.
+2013-04-11 20:06:45|register.php|results|register: already registered name..
+2013-04-11 20:06:45|register.php|results|NDA|1|ndc_register|fail to ioctl=-15|/root/ndas-2.6-32/admin/ndasadmin.c:1013.
+2013-04-11 20:07:07|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|/dev/ndas-44812187-0
+2013-04-11 20:07:07|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|NTFS signature is missing.
+2013-04-11 20:07:07|ndasIsNdasDeviceMounted|ndas-44812187-0 is listed in mount output.
+2013-04-11 20:07:07|ndasIsNdasDeviceMounted|/dev/ndas-44812187-0p1 on /media/351une-1 type ext2 (rw).
+2013-04-11 20:07:07|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|/dev/ndas-44812187-1
+2013-04-11 20:07:07|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|Error opening '/dev/ndas-44812187-1': Read-only file system
+2013-04-11 20:08:33|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|/dev/ndas-44812187-0
+2013-04-11 20:08:33|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|NTFS signature is missing.
+2013-04-11 20:08:33|ndasIsNdasDeviceMounted|ndas-44812187-0 is listed in mount output.
+2013-04-11 20:08:33|ndasIsNdasDeviceMounted|/dev/ndas-44812187-0p1 on /media/351une-1 type ext2 (rw).
+2013-04-11 20:08:33|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|/dev/ndas-44812187-1
+2013-04-11 20:08:33|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|Error opening '/dev/ndas-44812187-1': Read-only file system
+2013-04-11 20:10:11|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|/dev/ndas-44812187-0
+2013-04-11 20:10:11|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|NTFS signature is missing.
+2013-04-11 20:10:11|ndasIsNdasDeviceMounted|ndas-44812187-0 is listed in mount output.
+2013-04-11 20:10:11|ndasIsNdasDeviceMounted|/dev/ndas-44812187-0p1 on /media/351une-1 type ext2 (rw).
+2013-04-11 20:10:11|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|/dev/ndas-44812187-1
+2013-04-11 20:10:11|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|Error opening '/dev/ndas-44812187-1': Read-only file system
+2013-04-11 20:16:09|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|/dev/ndas-44812187-0
+2013-04-11 20:16:09|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 12|NTFS signature is missing.
+2013-04-11 20:16:09|ndasIsNdasDeviceMounted|ndas-44812187-0 is listed in mount output.
+2013-04-11 20:16:09|ndasIsNdasDeviceMounted|/dev/ndas-44812187-0p1 on /media/351une-1 type ext2 (rw).
+2013-04-11 20:16:09|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|/dev/ndas-44812187-1
+2013-04-11 20:16:09|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 18|Error opening '/dev/ndas-44812187-1': Read-only file system

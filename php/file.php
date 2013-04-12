@@ -74,8 +74,13 @@ if ($allowAccess == true) {
 	include('netdisk.functions.php');
 	$ndasmode = ndasIsMountedVolumeWritable($dir);
 
-	echo "<h3>Index of $visible_directory  (NDAS Mode $ndasmode)</h3>";
-	
+	echo "<h3>Index of $visible_directory - Access $ndasmode</h3>
+	<div class='file-access-notice'>";
+	if($ndasmode == 'RO')
+		echo "Current user has no permission to write in this folder.";
+	else
+		echo "&nbsp;";
+	echo "</div>";	
 	?>
 		
 	<div class=list>
