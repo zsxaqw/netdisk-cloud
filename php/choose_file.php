@@ -1,9 +1,10 @@
 <?php 
 include('auth.php');
 $postpath = isset($_POST['path'])? $_POST['path'] : null;
-echo "pp:$postpath<br>";
 $path = base64_decode($postpath);
-echo "dp:$path<br>";
+
+//echo "pp:$postpath<br>";
+//echo "dp:$path<br>";
 
 if ($path == null){
 	die('Need Destination.');
@@ -74,7 +75,8 @@ $visible_directory=str_replace($TOP_MOUNTABLE_DIRECTORY,'',$path);
     </script>
 </head>
 <body>
-  Upload to<br>&nbsp;&nbsp;<?php echo $visible_directory;?><br>
+  <h2>Upload files</h2>
+  	Destination:<br>&nbsp;&nbsp;<?php echo $visible_directory;?><br>
   <form id="form1" enctype="multipart/form-data" method="post" 
 	action="upload.ht5.php">
     <div class="row">

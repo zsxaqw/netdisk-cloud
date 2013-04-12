@@ -6,5 +6,5 @@ php/config.php.old
 php/config.test.php
 php/netdisk.user.test
 php/showErrors.php
-#files/*
+files/*
 *~

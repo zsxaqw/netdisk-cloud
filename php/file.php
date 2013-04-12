@@ -165,7 +165,8 @@ if ($allowAccess == true) {
 	if($ndasmode == 'RO')
 		echo "Current user has no permission to write in this folder.";
 	else
-		echo "&nbsp;";
+		echo "Todo: Delete should ask for confirmation, then delete and reload.<br>
+		&nbsp;";
 	echo "</div>";	
 	?>
 		
@@ -184,8 +185,11 @@ if ($allowAccess == true) {
 	if ( !$dh ) {
 	    die("cannot open $dir");
 	}
+	$count = 0;
 	while ( $entry = readdir($dh) )
 	{
+		$count ++;
+		
 	    if( $entry == '.' )
 			continue;
 	    if( $entry == '..' )
@@ -223,9 +227,9 @@ if ($allowAccess == true) {
 	      <td>Directory</td>
 	      <td>
 			<?php
-			if($entry != ".." && $entry != "." && $entry != 'lost+found'){
+			if($entry != ".." && $entry != "." && $entry != 'lost+found' &&  ndasIsMountedVolumeWritable($entry) == 'RW'){
 			?>
-				<form method=GET action=delete.php>
+				<form method=GET action=delete.php onSubmit="if(confirm('Are you sure? Click OK to delete. Click Cancel if this is a mistake.')) return true; return false;">
 	            <input type=hidden name=file value="<?php echo urlencode($e_file_param); ?>">
 	            <input type=submit value=Delete class=btn></form>
 			<?php } else {
@@ -245,7 +249,7 @@ if ($allowAccess == true) {
 	                <?php echo $entry; ?></a></td>
 	      <td><?php echo filesize($e_file); ?></td>
 	      <td><?php echo filetype($e_file); ?></td>
-	      <td><form method=GET action=delete.php>
+	      <td><form method=GET action=delete.php  onSubmit="if(confirm('Are you sure? Click OK to delete. Click Cancel if this is a mistake.')) return true; return false;">
 	            <input type=hidden name=file value="<?php echo urlencode($e_file_param); ?>">
 	            <input type=submit value=Delete class=btn></form>
 	      </td>
