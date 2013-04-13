@@ -5,6 +5,8 @@ php/config.new.php
 php/config.php.old
 php/config.test.php
 php/netdisk.user.test
+php/netdisk.sessions
 php/showErrors.php
 files/*
+sessions/sess_*
 *~

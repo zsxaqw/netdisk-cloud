@@ -65,12 +65,12 @@ function AuthUser($iuserid,$iuserpw)
 	{
 		if(fscanf($fp,"%s %s %s\n",$userid,$userpw,$usergrp))
 		{
-			echo "$userid == $iuserid ?<br>";
+			//echo "$userid == $iuserid ?<br>";
 			if($userid == $iuserid)
 			{
 				// check the password the user tried to login with
 				require('passhash.php');
-				echo "Check $userpw vs. $iuserpw";
+				//echo "Check $userpw vs. $iuserpw";
 				if (PassHash::check_password($userpw, $iuserpw))  
 				//if($userpw == $iuserpw)
 				{

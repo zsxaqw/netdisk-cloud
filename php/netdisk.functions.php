@@ -648,7 +648,7 @@ function ndasIsBlockDeviceWritable($device){
 		} 
 		
 		/* Since we could not prove it is RO, we assume RW on ntfs is ok. */
-		return "RW $partitionToTest";
+		return "RW";
 			
 	} else {
 		/* create a temp folder */  
