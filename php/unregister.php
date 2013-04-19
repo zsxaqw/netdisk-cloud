@@ -29,7 +29,7 @@ if (!empty($slot)) {
 	 * for the base device name. Not the full slot device name. 
 	 */	
 	$ndas_dev = "ndas-" . trim(ndasGetNdasDeviceSerialNumberFromName($name));
-	$command = "sudo /bin/mount | grep $ndas_dev 2>&1";
+	$command = escapeshellcmd("sudo /bin/mount | grep $ndas_dev 2>&1");
 
 	exec($command,$output,$return);
 	if ($return === 0) {
@@ -51,7 +51,7 @@ if ($name && !$is_mounted) {
 	$output = Array();
 	$return = null;
 
-	$command = 'sudo /usr/sbin/ndasadmin unregister --name "'. $name .'" 2>&1';
+	$command = escapeshellcmd('sudo /usr/sbin/ndasadmin unregister --name "'. $name .'" 2>&1');
 	exec($command,$output,$return);
 
 	if ($return > 0) {

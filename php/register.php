@@ -38,7 +38,7 @@ if (strpos($ndas_id, 'ooooo')){
 	$retry = '';
 
 	// Try registering the device
-	$command = "sudo /usr/sbin/ndasadmin register $id1-$id2-$id3-$id4$id5 --name \"$id6\" 2>&1";
+	$command = escapeshellcmd("sudo /usr/sbin/ndasadmin register $id1-$id2-$id3-$id4$id5 --name \"$id6\" 2>&1");
 	$message = date('Y-m-d H:i:s'). "|register.php|attempt|$command.\n";
 	ndasPhpLogger(5,$message);
 	exec($command,$results,$return);

@@ -28,7 +28,7 @@ if (userIsAdmin()) {
 	$message = '';
 
 	/* see if the path is a mount point */
-	$command = "mountpoint $path 2>&1";
+	$command = escapeshellcmd("mountpoint $path 2>&1");
 	exec($command,$output,$return);
 	if ($return > 0) {
 		$message = "|umount.php|$path is not used as a mount point at this time.";
@@ -39,7 +39,7 @@ if (userIsAdmin()) {
 	}
 	
 	/* make sure the device is mounted on the mount point.*/ 
-	$command = "mount | grep $path 2>&1";
+	$command = escapeshellcmd("mount | grep $path 2>&1");
 	exec($command,$output,$return);
 
 	if ($return > 0) {
@@ -63,7 +63,7 @@ if (userIsAdmin()) {
 	 * this device.
 	 */ 
 	 
-	$command = "lsof $path 2>&1";
+	$command = escapeshellcmd("lsof $path 2>&1");
 	exec($command,$output,$return);
 	if ($return == 0) {
 		$message = "|umount.php|$path is apparently in use at this time.";
@@ -78,7 +78,7 @@ if (userIsAdmin()) {
 	}
 
 	/* try unmounting */
-	$command = "sudo /bin/umount $device 2>&1";
+	$command = escapeshellcmd("sudo /bin/umount $device 2>&1");
 	exec($command,$output,$return);
 	if ($return > 0) {
 		$message = "|umount.php|Unmounting failed.";

@@ -35,7 +35,7 @@ $empty_udirs=array();
 /* Sometimes the partition information is incomplete just after enabling. */
 $output = null;
 $return_var = null;
-exec("sudo /sbin/blkid ", $output, $return_var);
+exec(escapeshellcmd("sudo /sbin/blkid ", $output, $return_var));
 
 /* get the /dev/ndas- name based on the slot */
 $devname_str = ndasGetDeviceNameFromSlot($slot);

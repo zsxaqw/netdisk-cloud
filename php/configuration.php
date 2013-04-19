@@ -17,18 +17,27 @@ if($_SESSION['USERGROUP'] == 'admin') {
 		echo '<div style="text-align:center; font-color:red">'. $_SESSION['config_message'] .'</div>';
 		unset($_SESSION['config_message'] );
 	}
-	/* Test for missing programs and user sudo abilities */
-	testCurrentUserSudoAbilities();
 
 	echo "<h2>Todo: </h2> 
 		<ul>
 			<li>Add config for max file size upload.</li>
 			<li>Mabye config for file types</li>
+			<li>Use `which COMMAND` to locate all needed commands on the system</li>
+			<li>Intial config shows many missing variable errors, mabye ini_set error check none</li>
 			<li>Each user needs their own folder for downloads</li>
-			<li>Have take ownership of file / all files button</li>
+			<li>Notifiy about the RW NDAS, even if the directory is RO</li>
+			<li>Have take ownership of 'file / all files' button if the volume is on NDAS device</li>
 			<li>Mabye a chmod section with recursive power</li>
+			<li>Put all displayed components into classes for css skining</li>
+			<li>Add the dismount button to the mounted directory section</li>
+			<li>Assume RO on all files in a RO directory</li>
+			
 		</ul>
 	 <br>";
+
+	/* Test for missing programs and user sudo abilities */
+	testCurrentUserSudoAbilities();
+
 	 
 	echo "<h2>Change configuration settings</h2>";
 ?>

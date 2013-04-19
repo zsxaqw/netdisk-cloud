@@ -60,7 +60,7 @@ if ( strpos($mount_devi, $needle) >= 0 ) {
 			/* ntfs file system uses different mounting options. */
 			if ($mount_type === "ntfs") {
 				$ntfs3g = findNtfs3g();
-				$command ="sudo $ntfs3g $ROMOUNT $mount_devi $mount_path 2>&1";
+				$command =escapeshellcmd("sudo $ntfs3g $ROMOUNT $mount_devi $mount_path 2>&1");
 				exec($command,$output,$return);
 				if ($return > 0) {
 					$message = date('Y-m-d H:i:s'). "|mount.php|failed 
@@ -79,7 +79,7 @@ if ( strpos($mount_devi, $needle) >= 0 ) {
 				# We have to see if this is a new disk. The owner must be set if it is.
 				# Otherwise, root will own the filesystem and we can't write data.
 
-				$command ="sudo /bin/mount -t $mount_type $mount_devi $mount_path $ROMOUNT 2>&1";
+				$command = escapeshellcmd("sudo /bin/mount -t $mount_type $mount_devi $mount_path $ROMOUNT 2>&1");
 				exec($command,$output,$return);
 				if ($return > 0) {
 					$message = date('Y-m-d H:i:s'). "|mount.php|failed 

@@ -29,7 +29,7 @@ if ($slot){
 
  	echo "Enable slot \"$slot\" in read only mode. <br>";
 			
-	$command = "sudo /usr/sbin/ndasadmin enable -s $slot -o r 2>&1";
+	$command = escapeshellcmd("sudo /usr/sbin/ndasadmin enable -s $slot -o r 2>&1");
 	exec($command,$output,$return);
 	if ($return > 0) {
 		$message = date('Y-m-d H:i:s'). "|enable_read.php|enablero|failed|$command.\n";

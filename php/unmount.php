@@ -28,7 +28,7 @@ if ($umount_path !== false){
 	$retry = '';
 
 	/* Attempt to unmount the volume */
-	$command = "sudo umount $umount_path 2>&1";
+	$command = escapeshellcmd("sudo umount $umount_path 2>&1");
 	exec($command,$results,$return);
 	if ($return > 0) {
 		$message = date('Y-m-d H:i:s'). "|umount.php|unmount|failed on $umount_path.\n";

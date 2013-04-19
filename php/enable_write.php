@@ -35,7 +35,7 @@ if ($slot){
 
 	/* request rw access or attempt to enable */
 	if ( $requestrw === "y" ) {
-		$command = "sudo /usr/sbin/ndasadmin request -s $slot 2>&1";
+		$command = escapeshellcmd("sudo /usr/sbin/ndasadmin request -s $slot 2>&1");
 		$message = date('Y-m-d H:i:s'). "|enable_write.php|requestrw|attempt|$command.\n";
 		ndasPhpLogger(5,$message);
 		exec($command,$results,$return);
@@ -78,7 +78,7 @@ if ($slot){
 
 		echo "Enable slot \"$slot\" in exclusive read/write mode. <br>";
 				
-		$command = "sudo /usr/sbin/ndasadmin enable -s $slot -o w 2>&1";
+		$command = escapeshellcmd("sudo /usr/sbin/ndasadmin enable -s $slot -o w 2>&1");
 		exec($command,$output,$return);
 		if ($return > 0) {
 			$message = date('Y-m-d H:i:s'). "|enable_write.php|enablerw|failed|$command.\n";

@@ -26,7 +26,7 @@ function ndasIsNdasDeviceMounted($ndas_dev){
 	$is_mounted = FALSE;
 	
 	/* See if this device is mounted or not */
-	$command = "sudo /bin/mount | grep $ndas_dev 2>&1";
+	$command = escapeshellcmd("sudo /bin/mount | grep $ndas_dev 2>&1");
 	exec($command,$output,$return);
 	if ($return === 0) {
 		$is_mounted = TRUE;
@@ -108,7 +108,7 @@ function testCurrentUserSudoAbilities(){
 	// Missing command programs are noted, now test if user has sudo privileges
 
 	foreach($all_commands as $ack => $acv){	
-		$command = "sudo -l $acv 2>&1";
+		$command = escapeshellcmd("sudo -l $acv 2>&1");
 		$message = date('Y-m-d H:i:s'). "|testPermissions|attempt|$command.\n";
 		ndasPhpLogger(5,$message);
 		exec($command,$results,$return);
@@ -197,7 +197,7 @@ function ndasSetBlockDeviceScheduler($scheduler,$device){
 	$error_log = "./netdisk.error.log";
 	$err_message = "There may be more information in the local log file.";
 	
-	$command = "sudo ".$WEB_ROOT . $INSTALL_DIR. "/php/setscheduler $new_scheduler $filename";
+	$command = escapeshellcmd("sudo ".$WEB_ROOT . $INSTALL_DIR. "/php/setscheduler $new_scheduler $filename");
 	exec($command,$results,$return);
 	if($return !== 0) {
 		$message = date('Y-m-d H:i:s'). "|setscheduler.php|set|failed|$command.\n";
@@ -253,7 +253,7 @@ function ndasShowDiskInformation($func_slot){
 	$return_table .= "<tr><td>Block_Device</td>
 		<td>/dev/$blockdev</td></tr>";
 	
-	$command = "cat /proc/ndas/slots/$func_slot/info* 2>&1";
+	$command = escapeshellcmd("cat /proc/ndas/slots/$func_slot/info* 2>&1");
 	exec($command, $output, $return_var);
 	if($return_var == 0){
 
@@ -373,7 +373,7 @@ function ndasGetRegisteredNameFromDevice($func_device) {
 	}
 	
 	/* 2nd part is the serial number */
-	$command = "grep ". $explodedName[1] ."  /proc/ndas/devs | awk '{print $1}' 2>&1";
+	$command = escapeshellcmd("grep ". $explodedName[1] ."  /proc/ndas/devs | awk '{print $1}' 2>&1");
 	exec($command, $output, $return_var);
 	if ($return_var > 0) {
 		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|ndasGetRegisteredNameFromDevice|Failed. Retvar $return_var\n";
@@ -401,7 +401,7 @@ function ndasGetRegisteredNameFromSlot($func_slot) {
 	$output = Array();
 	$return_var = null;
 	$slotArray = Array();
-	$command = "cat /proc/ndas/devs | awk '{print $1\" \"$7\" \"$8}' 2>&1";
+	$command = escapeshellcmd("cat /proc/ndas/devs | awk '{print $1\" \"$7\" \"$8}' 2>&1");
 	if(is_file('/proc/ndas/devs')){
 		exec($command, $output, $return_var);
 		for($i=1;$i< count($output); $i++){
@@ -495,7 +495,7 @@ function ndasIsDeviceEnabledRwOrRo($device) {
 	$retval = '';
 		
 	/* determine if the device exists. */
-	$command = "/bin/ls /dev/$device  2>&1";
+	$command = escapeshellcmd("/bin/ls /dev/$device  2>&1");
 	exec($command,$output,$return);
 	if ($return > 0) {
 		$message = date('Y-m-d H:i:s'). 
@@ -505,7 +505,7 @@ function ndasIsDeviceEnabledRwOrRo($device) {
 	} 
 	
 	$ntfs3g = findNtfs3g();
-	$command = "sudo $ntfs3g.probe --readwrite /dev/$device 2>&1";
+	$command = escapeshellcmd("sudo $ntfs3g.probe --readwrite /dev/$device 2>&1");
 	exec($command,$output,$return);
 	if ($return > 0) {
 		if ($return == 19){
@@ -567,7 +567,7 @@ function ndasIsBlockDeviceWritable($device){
 	$ONLYRO = false;
 	
 	/* ) determine if a partition exists. devname-#p# typically */
-	$command = "/bin/ls $device | grep p  2>&1";
+	$command = escapeshellcmd("/bin/ls $device | grep p  2>&1");
 	exec($command,$output,$return);
 	if ($return > 0) {
 		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|ls|No partitions on $device\n";
@@ -582,7 +582,7 @@ function ndasIsBlockDeviceWritable($device){
 	unset($v);
 	
 	/* ) get the file system type blkid */
-	$command = 'sudo /sbin/blkid -s TYPE -o value '.$partitionToTest.'  2>&1';
+	$command = escapeshellcmd('sudo /sbin/blkid -s TYPE -o value '.$partitionToTest.'  2>&1');
 	exec($command,$output,$return);
 	if ($return > 0) {
 		$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|blkid|$v\n";
@@ -603,7 +603,7 @@ function ndasIsBlockDeviceWritable($device){
 	 */
 	if ($partitionFileSystemType == 'ntfs') {
 		$ntfs3g = findNtfs3g();
-		$command = "sudo $ntfs3g.probe --readwrite $partitionToTest 2>&1";
+		$command = escapeshellcmd("sudo $ntfs3g.probe --readwrite $partitionToTest 2>&1");
 		exec($command,$output,$return);
 		
 		if ($return == 19){
@@ -639,7 +639,7 @@ function ndasIsBlockDeviceWritable($device){
 			 * can be mounted RO. It is safe even if errors on RW. 
 			 */
 			$ntfs3g = findNtfs3g();
-			$command = "sudo $ntfs3g.probe --readonly $partitionToTest 2>&1";
+			$command = escapeshellcmd("sudo $ntfs3g.probe --readonly $partitionToTest 2>&1");
 			exec($command,$output,$return);
 			if ($return == 0) 
 				return 'RO';
@@ -674,7 +674,7 @@ function ndasIsBlockDeviceWritable($device){
 		/* see what we get with mount command 
 			-n "no mtab entry" 
 			-w "explicit read/write" */
-		$command = "sudo /bin/mount -nw -t $partitionFileSystemType $partitionToTest $tempMountingDirectory 2>&1";
+		$command = escapeshellcmd("sudo /bin/mount -nw -t $partitionFileSystemType $partitionToTest $tempMountingDirectory 2>&1");
 		exec($command,$output,$return);
 		if ($return > 0) {
 			$message = date('Y-m-d H:i:s'). "|netdisk.functions.php|isNdasBlockDeviceWritable|$command\n";
@@ -694,7 +694,7 @@ function ndasIsBlockDeviceWritable($device){
 			$retval = "RW ";
 			/* If the file system mounted rw, we must unmount. We did not write 
 			 * in the mtab entry before so it must dismount here with the directory. */
-			$command = "sudo /bin/umount -l $tempMountingDirectory 2>&1";
+			$command = escapeshellcmd("sudo /bin/umount -l $tempMountingDirectory 2>&1");
 			exec($command,$output,$return);
 			if ($return > 0) {
 				foreach ($output as $v) { 
