@@ -42,7 +42,7 @@ $devname_str = ndasGetDeviceNameFromSlot($slot);
 
 /* search partitions on the ndas device. */
 $devfile="/dev/$devname_str";
-exec("ls $devfile* | grep p", &$mount_path);
+exec(escapeshellcmd("ls $devfile* | grep p"), $mount_path, $return_var);
 
 for($i=0;$i<count($mount_path);$i++)
 {
@@ -62,51 +62,54 @@ for($i=0;$i<count($mount_path);$i++)
 	$needle=$WEB_ROOT.$INSTALL_DIR."/";
 	$local_path=str_replace($needle,"",$path);
 	
-	$ndas_device = ndasGetNdasDeviceNameFromSerial($devname_str)
+	$ndas_device = ndasGetNdasDeviceNameFromSerial($devname_str);
+
 ?>
-<tr>
-<td><?=$ndas_device?></td>
-<td><?=$d?></td>
-<td><?=$label?></td>
-<td><?=$type?></td>
-<?php
- if ( $path == "") { 
-exec("find ".$TOP_MOUNTABLE_DIRECTORY."/ -maxdepth $SUB_DIR_LEVELS -type d -empty", $empty_pdirs);
-sort($empty_pdirs);
-?>
-<form style='display:inline' action='mount.php' method='get'
-		target='_mountndas' onSubmit='javascript:ndasMountVol()'>
-<td><select name="mount_path">
-<?php
-	
-	foreach($empty_pdirs as $pdir){
-	echo '<option value="'.$pdir.'">'.str_replace($TOP_MOUNTABLE_DIRECTORY."/","",$pdir).'</option>\n';
-	}
-	unset($empty_pdirs);
-?></select></td>
-<td>
-<input name="mount_slot" value="<?=$slot?>" type="hidden">
-<input name="mount_devi" value="<?=$d?>" type="hidden">
-<input name="mount_type" value="<?=$type?>" type="hidden">
-<input value="Mount" type="submit">
-</td>
-</form>
-<? } else {  
-$showdir=base64_encode($path);
-?>
-<td><a href="file.php?path=<?=$showdir?>"><?=$local_path?></a></td>
-<td>
-<form style='display:inline' action='umount.php' method='get'
-		target='_unmountndas' onSubmit='javascript:ndasUnmountVol()'>
-<input name="umount_slot" value="<?=$slot?>" type="hidden">
-<input name="umount_devi" value="<?=$d?>" type="hidden">
-<input name="umount_path" value="<?=$path?>" type="hidden">
-<input value="Unmount" type="submit">
-</form>
-<? } ?>
+	<tr>
+	<td><?php echo $ndas_device ?></td>
+	<td><?php echo $d; ?></td>
+	<td><?php echo $label; ?></td>
+	<td><?php echo $type; ?></td>
+	<?php
+	 if ( $path == "") { 
+		exec("find ".$TOP_MOUNTABLE_DIRECTORY."/ -maxdepth $SUB_DIR_LEVELS -type d -empty", $empty_pdirs);
+		sort($empty_pdirs);
+	?>
+		<form style='display:inline' action='mount.php' method='get'
+				target='_mountndas' onSubmit='javascript:ndasMountVol()'>
+		<td><select name="mount_path">
+		<?php
+			
+			foreach($empty_pdirs as $pdir){
+				echo '<option value="'.$pdir.'">'. str_replace($TOP_MOUNTABLE_DIRECTORY."/","",$pdir) .'</option>\n';
+			}
+			unset($empty_pdirs);
+		?></select></td>
+		<td>
+		<input name="mount_slot" value="<?php echo $slot; ?>" type="hidden">
+		<input name="mount_devi" value="<?php echo $d; ?>" type="hidden">
+		<input name="mount_type" value="<?php echo $type; ?>" type="hidden">
+		<input value="Mount" type="submit">
+		</td>
+		</form>
+	<?php } else {  
+		$showdir=base64_encode($path);
+		?>
+		<td><a href="file.php?path=<?php echo $showdir;?>"><?php echo $local_path; ?></a></td>
+		<td>
+		<form style='display:inline' action='umount.php' method='get'
+				target='_unmountndas' onSubmit='javascript:ndasUnmountVol()'>
+		<input name="umount_slot" value="<?=$slot?>" type="hidden">
+		<input name="umount_devi" value="<?=$d?>" type="hidden">
+		<input name="umount_path" value="<?=$path?>" type="hidden">
+		<input value="Unmount" type="submit">
+		</form>
+	<?php } ?>
 </td>
 </tr>
-<? } ?>
+<?php 
+}
+?>
 </table>
 <form method="GET" action="list.php">
 <input value="Back" type="submit">

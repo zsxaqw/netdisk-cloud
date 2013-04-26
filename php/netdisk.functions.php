@@ -495,8 +495,12 @@ function ndasIsDeviceEnabledRwOrRo($device) {
 	$retval = '';
 		
 	/* determine if the device exists. */
-	$command = escapeshellcmd("/bin/ls /dev/$device  2>&1");
+	$command = escapeshellcmd("/bin/ls /dev/$device") ." 2>&1";
 	exec($command,$output,$return);
+	$message = date('Y-m-d H:i:s'). 
+	"|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|command|$command.\n";
+	ndasPhpLogger(5,$message);
+
 	if ($return > 0) {
 		$message = date('Y-m-d H:i:s'). 
 		"|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|$device does not exist.\n";

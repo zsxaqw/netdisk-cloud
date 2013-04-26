@@ -60,13 +60,15 @@ if($slot && !$is_mounted){
 } else {
 	echo "Error: Invalid slot or mounted device.";	
 }
-?>
 
+$refpage = $_SERVER['HTTP_REFERER'];
+echo "
 <script>
-	opener.location.href='./list.php';
+	opener.location.href='$refpage';
 </script>
 <br>
 <a href='javascript:self.close()'>Close window</a>
-
 </body>
-</html>
+</html>";
+
+?>

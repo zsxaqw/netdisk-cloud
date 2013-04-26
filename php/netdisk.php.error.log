@@ -1,0 +1,15 @@
+2013-04-26 13:40:54|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|ndas-44812187-0 does not exist.
+2013-04-26 13:40:56|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|ndas-44812187-0 does not exist.
+2013-04-26 13:41:25|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|ndas-44812187-1 does not exist.
+2013-04-26 14:51:58|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|ndas-44812187-1 does not exist.
+2013-04-26 14:55:24|disable.php|failed to disable slot 2.
+2013-04-26 14:55:24|disable.php|failed|disable: slot 2 is not enabled
+2013-04-26 14:55:42|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|ndas-44812187-1 does not exist.
+2013-04-26 15:00:20|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|command|/bin/ls /dev/ndas-44812187-1  2\>\&1.
+2013-04-26 15:00:20|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|ndas-44812187-1 does not exist.
+2013-04-26 15:00:22|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|command|/bin/ls /dev/ndas-44812187-1  2\>\&1.
+2013-04-26 15:00:22|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ls|ndas-44812187-1 does not exist.
+2013-04-26 15:01:31|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|command|/bin/ls /dev/ndas-44812187-1 2>&1.
+2013-04-26 15:01:31|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 11|/dev/ndas-44812187-1
+2013-04-26 15:01:46|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|command|/bin/ls /dev/ndas-44812187-1 2>&1.
+2013-04-26 15:01:46|netdisk.functions.php|isNdasDeviceEnabledRwOrRo|ntfs-3g.probe|returned: 11|/dev/ndas-44812187-1
